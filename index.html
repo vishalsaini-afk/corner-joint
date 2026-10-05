@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#13161b">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Corner Check · Lingel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#13161b;--panel:#1b1f26;--panel2:#232832;--line:#2e3440;--text:#eceef1;--muted:#8d96a3;
+  --hv:#ffce1f;--ok:#35c98a;--bad:#ff5252;--todo:#4a5260;--prog:#6aa7ff;
+  --sans:'Archivo',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-tap-highlight-color:transparent}
+body{padding-bottom:env(safe-area-inset-bottom,0px);min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.4;cursor:default}
+:focus-visible{outline:2px solid var(--hv);outline-offset:2px}
+[hidden]{display:none!important}
+.wrap{max-width:720px;margin:0 auto;padding:14px 16px}
+header.top{position:sticky;top:0;z-index:30;background:rgba(19,22,27,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.hrow{display:flex;align-items:center;gap:10px;padding:10px 16px}
+.brand{font-weight:800;letter-spacing:.14em;font-size:13px;color:var(--hv)}
+.ttl{font-weight:700;font-size:17px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ib{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:14px;text-decoration:none;color:var(--text);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.ib:active{transform:scale(.97)}
+.btn{border:0;border-radius:12px;padding:14px 18px;font-weight:700;font-size:16px;background:var(--hv);color:#15171b;width:100%;display:block;text-align:center}
+.btn.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+.btn.ok{background:var(--ok);color:#06140d}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.mono{font-family:var(--mono)}
+h2{font-size:16px;font-weight:700;margin:0 0 10px}
+p.lead{margin:0 0 14px;color:var(--muted);font-size:14px;line-height:1.45}
+label.f{display:block;font-size:13px;color:var(--muted);margin-bottom:10px}
+label.f input,label.f select,textarea.in{display:block;width:100%;margin-top:4px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-size:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.seg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px;margin-top:4px}
+.seg button{flex:1;border:0;background:transparent;padding:9px 6px;border-radius:8px;font-weight:600;color:var(--muted)}
+.seg button.on{background:var(--panel2);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}
+
+/* steps */
+.steps{display:flex;gap:4px;padding:0 12px 10px;overflow-x:auto}
+.steps button{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 6px;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
+.steps button i{font-style:normal;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--panel2);font-family:var(--mono);font-size:11.5px;flex:none}
+.steps button.on{border-color:var(--hv);color:var(--text)}
+.steps button.on i{background:var(--hv);color:#15171b}
+.steps button.done i{background:var(--ok);color:#06140d}
+@media (max-width:420px){.steps button span{display:none}.steps button.on span{display:inline}}
+
+/* pills */
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12.5px;font-weight:700;white-space:nowrap}
+.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.v-ok{color:var(--ok);background:rgba(53,201,138,.12)}
+.v-fail{color:var(--bad);background:rgba(255,82,82,.13)}
+.v-prog{color:var(--prog);background:rgba(106,167,255,.12)}
+.v-todo,.v-skip{color:var(--muted);background:rgba(141,150,163,.12)}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+
+/* jobs */
+.drop{display:flex;flex-direction:column;align-items:center;gap:8px;border:2px dashed #4a5260;border-radius:16px;padding:28px 16px;background:var(--panel);text-align:center;width:100%}
+.drop b{font-size:17px}
+.drop span{color:var(--muted);font-size:13.5px}
+.job{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);margin-bottom:8px;width:100%;text-align:left}
+.job .m{flex:1;min-width:0}
+.job .m b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.job .m span{font-size:12.5px;color:var(--muted)}
+.empty{text-align:center;padding:22px 10px;color:var(--muted);font-size:14px}
+.status{font-size:14px;padding:10px 12px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);margin-top:10px}
+.status.err{border-color:rgba(255,82,82,.5);color:#ffb3b3}
+.status.good{border-color:rgba(53,201,138,.5);color:#9ff0c9}
+
+/* position cards */
+.pc{display:flex;gap:12px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--panel);margin-bottom:8px;width:100%;text-align:left}
+.pc.skip{opacity:.5}
+.pc .dr{width:58px;height:58px;border-radius:8px;background:#fff center/contain no-repeat;flex:none}
+.pc .dr.none{background:var(--panel2);display:grid;place-items:center;color:var(--muted);font-size:11px}
+.pc .m{flex:1;min-width:0}
+.pc .m b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc .m span{font-size:12.5px;color:var(--muted)}
+.cnts{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap;align-items:center}
+.cnt{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.cnt button{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);font-size:18px;line-height:1}
+.cnt b{min-width:18px;text-align:center;font-size:16px;color:var(--text);font-family:var(--mono)}
+.skipb{margin-left:auto;font-size:12.5px;padding:6px 10px}
+.skipb.on{border-color:var(--hv);color:var(--hv)}
+.minis{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.mini{display:grid;grid-template-columns:repeat(2,9px);gap:2px}
+.mini i{width:9px;height:9px;border-radius:2px;background:var(--todo)}
+.prog{height:8px;border-radius:4px;background:var(--panel2);overflow:hidden;display:flex;margin:8px 0}
+.prog i{display:block;height:100%}
+
+/* window drawing — the corner picker */
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px}
+.tabs button{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:9px 14px;font-weight:600;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.tabs button.on{border-color:var(--hv);color:var(--hv)}
+.posdraw{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.posdraw img{height:84px;max-width:40%;background:#fff;border-radius:8px;padding:3px;object-fit:contain}
+.win{position:relative;width:min(100%,380px);margin:4px auto 10px;aspect-ratio:4/5}
+.win .fr{position:absolute;inset:0;border:18px solid #3b424e;border-radius:3px;
+  background:linear-gradient(135deg,rgba(130,180,220,.13),rgba(130,180,220,.03) 55%,rgba(255,255,255,.07));
+  box-shadow:inset 0 0 0 2px #262b34,0 0 0 1px #4a525f}
+.win.sash .fr{border-width:13px;border-color:#454d5a}
+.win .mid{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;pointer-events:none}
+.win .mid b{display:block;font-size:20px}
+.win .mid span{font-size:13px;color:var(--muted)}
+.cn{position:absolute;width:41%;aspect-ratio:1;border-radius:12px;border:3px solid var(--todo);
+  background:#1f242d center/cover no-repeat;display:flex;align-items:center;justify-content:center;padding:0;overflow:hidden}
+.cn.TL{top:0;left:0}.cn.TR{top:0;right:0}.cn.BL{bottom:0;left:0}.cn.BR{bottom:0;right:0}
+.cn .lb{position:absolute;left:6px;right:6px;bottom:6px;background:rgba(15,17,21,.86);border-radius:8px;padding:5px 6px;font-size:12.5px;font-weight:600;display:flex;justify-content:space-between;gap:4px}
+.cn.ok{border-color:var(--ok)}.cn.fail{border-color:var(--bad)}.cn.prog{border-color:var(--prog)}
+.bar{position:sticky;bottom:0;background:rgba(19,22,27,.97);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:center;z-index:25}
+
+/* sheets */
+.sheet{position:fixed;inset:0;z-index:50;background:var(--bg);display:none;flex-direction:column}
+.sheet.on{display:flex}
+.sheet .body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.ph{position:relative;background:#0d0f12;border:1px solid var(--line);border-radius:14px;overflow:hidden;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center}
+.ph img{width:100%;height:100%;object-fit:contain}
+.ph .none{text-align:center;color:var(--muted);font-size:14px;padding:20px}
+.warn{background:rgba(255,157,46,.1);border:1px solid rgba(255,157,46,.4);color:#ffc98e;border-radius:10px;padding:9px 12px;font-size:13.5px;margin-top:10px}
+.ai{background:rgba(106,167,255,.08);border:1px solid rgba(106,167,255,.35);border-radius:10px;padding:10px 12px;font-size:14px;margin-top:10px}
+.ai b{color:var(--prog)}
+.verdict{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 4px}
+.verdict button{border:2px solid var(--line);background:var(--panel2);border-radius:14px;padding:16px 8px;font-weight:800;font-size:18px;color:var(--muted)}
+.verdict button.on[data-v=ok]{border-color:var(--ok);color:var(--ok);background:rgba(53,201,138,.14)}
+.verdict button.on[data-v=bad]{border-color:var(--bad);color:var(--bad);background:rgba(255,82,82,.14)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chips button{border:1px solid var(--line);background:var(--panel2);border-radius:999px;padding:9px 13px;font-size:14px;font-weight:600;color:var(--muted)}
+.chips button.on{border-color:var(--bad);color:#ffc0c0;background:rgba(255,82,82,.14)}
+
+/* camera */
+#cam{background:#000}
+#cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#cam .guide{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#cam .hint{position:absolute;left:16px;right:16px;top:calc(14px + env(safe-area-inset-top,0px));text-align:center;background:rgba(0,0,0,.55);border-radius:10px;padding:10px;font-size:14px}
+#cam .ctl{position:absolute;left:0;right:0;bottom:0;padding:18px 20px calc(22px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:space-between;background:linear-gradient(transparent,rgba(0,0,0,.7))}
+.shutter{width:76px;height:76px;border-radius:50%;border:5px solid #fff;background:var(--hv)}
+.shutter:active{transform:scale(.93)}
+#zoom{background:#000}
+#zoom img{display:block;width:100%}
+#zoom.z2 img{width:250%}
+
+/* report */
+.stat{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.stat div{background:var(--panel2);border-radius:10px;padding:10px 8px;text-align:center}
+.stat b{display:block;font-size:22px;font-family:var(--mono)}
+.stat span{font-size:12px;color:var(--muted)}
+.hbar{margin-bottom:10px}
+.hbar .t{display:flex;justify-content:space-between;font-size:13.5px}
+.hbar .b{height:8px;border-radius:4px;background:var(--panel2);margin-top:4px}
+.hbar .b i{display:block;height:100%;border-radius:4px;background:var(--bad)}
+.nok{display:flex;gap:10px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);margin-bottom:6px;width:100%;text-align:left}
+.nok img{width:52px;height:52px;border-radius:6px;object-fit:cover;flex:none;background:#000}
+.nok .m{flex:1;min-width:0;font-size:13.5px}
+.nok .m b{display:block}
+.allok{border:2px solid var(--ok);color:var(--ok);border-radius:14px;padding:14px;text-align:center;font-weight:800;font-size:18px;margin-bottom:14px}
+
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:#2b313b;border:1px solid var(--line);padding:10px 16px;border-radius:10px;font-size:14px;z-index:90;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;text-align:center}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top" id="mainHdr">
+  <div class="hrow">
+    <a class="ib" href="index.html" aria-label="Back to Field Tools">⌂</a>
+    <span class="brand">LINGEL</span>
+    <span class="ttl" id="hdrTitle">Corner Check</span>
+    <button class="ib" id="btnJobs" hidden>Jobs</button>
+    <button class="ib" id="btnSettings" aria-label="Settings">⚙</button>
+  </div>
+  <nav class="steps" id="steps" hidden>
+    <button data-s="1"><i>1</i><span>Quotation</span></button>
+    <button data-s="2"><i>2</i><span>Frames &amp; sashes</span></button>
+    <button data-s="3"><i>3</i><span>Photos</span></button>
+    <button data-s="4"><i>4</i><span>Report</span></button>
+  </nav>
+</header>
+
+<!-- JOBS -->
+<section id="vJobs">
+  <div class="wrap">
+    <h2 style="font-size:26px;margin:6px 0 4px">Corner Check</h2>
+    <p class="lead">Upload the quotation, set frames and sashes per position, photograph every corner joint, then send the report.</p>
+    <button class="drop" id="btnUploadNew">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ffce1f" stroke-width="1.6"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/><path d="M12 17v-6M9 13.5l3-3 3 3"/></svg>
+      <b>Upload quotation PDF</b><span>Positions, sizes and drawings are read from it</span>
+    </button>
+    <input type="file" id="fileQuote" accept="application/pdf" hidden>
+    <div id="jobStatus"></div>
+    <button class="btn ghost" id="btnManual" style="margin-top:10px">Start without a quotation</button>
+    <h2 style="margin-top:22px">Saved jobs</h2>
+    <div id="jobList"></div>
+  </div>
+</section>
+
+<!-- STEP 1 -->
+<section id="vS1" hidden>
+  <div class="wrap">
+    <div class="panel">
+      <h2>Quotation</h2>
+      <div id="quoteInfo"></div>
+      <button class="btn ghost" id="btnReupload" style="margin-top:10px">Upload quotation again</button>
+      <div id="s1Status"></div>
+    </div>
+    <div class="panel">
+      <h2>Order details</h2>
+      <div class="grid2">
+        <label class="f">Offer no.<input id="fOffer" autocomplete="off"></label>
+        <label class="f">Phone<input id="fPhone" inputmode="tel" autocomplete="off"></label>
+      </div>
+      <label class="f">Customer<input id="fCust" autocomplete="off"></label>
+      <label class="f">Site address<input id="fAddr" autocomplete="off"></label>
+      <div class="grid2">
+        <label class="f">Material<div class="seg" id="segMat"><button type="button" data-v="alu">Aluminium</button><button type="button" data-v="upvc">uPVC</button></div></label>
+        <label class="f">Checked at<div class="seg" id="segStage"><button type="button" data-v="factory">Factory</button><button type="button" data-v="site">Site</button></div></label>
+      </div>
+      <label class="f">Checked by<input id="fBy" autocomplete="off"></label>
+    </div>
+    <button class="btn" data-go="2">Next: frames &amp; sashes</button>
+    <div style="height:30px"></div>
+  </div>
+</section>
+
+<!-- STEP 2 -->
+<section id="vS2" hidden>
+  <div class="wrap">
+    <p class="lead">Set how many frames and sashes each position has. The numbers are guessed from the position name, so correct any that are wrong. Skip positions you are not checking.</p>
+    <div id="s2List"></div>
+    <details class="panel" id="addPos">
+      <summary style="font-weight:700;cursor:pointer">Add a position by hand</summary>
+      <div style="height:10px"></div>
+      <label class="f">Position name<input id="apRef" placeholder="e.g. 12-W4-Bedroom"></label>
+      <div class="grid2"><label class="f">Width (mm)<input id="apW" inputmode="numeric"></label><label class="f">Height (mm)<input id="apH" inputmode="numeric"></label></div>
+      <button class="btn ghost" id="btnAddPos">Add position</button>
+    </details>
+    <button class="btn" data-go="3">Next: take photos</button>
+    <div style="height:30px"></div>
+  </div>
+</section>
+
+<!-- STEP 3 -->
+<section id="vS3" hidden>
+  <div class="wrap">
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><h2 style="margin:0">Corners checked</h2><span class="mono" id="s3Count"></span></div>
+      <div class="prog" id="s3Bar"></div>
+      <div class="small muted">Tap a position, then tap each corner. Corners are as seen from inside the room.</div>
+    </div>
+    <div id="s3List"></div>
+    <button class="btn" data-go="4" style="margin-top:6px">Next: report</button>
+    <div style="height:30px"></div>
+  </div>
+</section>
+
+<!-- POSITION -->
+<section id="vPos" hidden>
+  <div class="wrap">
+    <div class="row" style="margin-bottom:12px"><button class="ib" id="btnPosBack" style="flex:none">‹ All positions</button><span></span></div>
+    <div class="posdraw"><img id="posImg" alt="" hidden><div><b id="posRef" style="font-size:18px;display:block"></b><span class="muted small" id="posSize"></span><div id="posPill" style="margin-top:6px"></div></div></div>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div class="win" id="win"><div class="fr"></div><div class="mid"><b id="partName"></b><span id="partProg"></span></div></div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn ghost" id="btnPrevPos">‹ Previous</button>
+      <button class="btn ghost" id="btnNextPos">Next position ›</button>
+    </div>
+    <div style="height:30px"></div>
+  </div>
+</section>
+
+<!-- STEP 4 -->
+<section id="vS4" hidden>
+  <div class="wrap">
+    <div class="panel">
+      <h2>Summary</h2>
+      <div class="stat" id="s4Stat"></div>
+      <div class="prog" id="s4Bar"></div>
+    </div>
+    <div id="s4AllOk"></div>
+    <div class="panel" id="s4DefPanel"><h2>Problems found</h2><div id="s4Def"></div></div>
+    <div class="panel" id="s4NokPanel"><h2>Corners not OK</h2><div id="s4Nok"></div></div>
+    <button class="btn" id="btnPDF">PDF report</button>
+    <p class="small muted" style="margin:8px 2px 12px">Downloads the PDF, uploads it to the order's Drive folder and logs the check in the Sheet. Without internet it waits on the phone and sends itself later.</p>
+    <button class="btn ghost" id="btnShare">Share summary on WhatsApp</button>
+    <div id="s4Status"></div>
+    <div style="height:30px"></div>
+  </div>
+</section>
+
+<!-- CORNER SHEET -->
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle">
+  <header class="top"><div class="hrow">
+    <button class="ib" id="btnShClose" aria-label="Close">✕</button>
+    <span class="ttl" id="shTitle"></span>
+    <span class="pill v-todo" id="shVerdict"></span>
+  </div></header>
+  <div class="body"><div class="wrap">
+    <div class="ph" id="ph"></div>
+    <div id="qwarn"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn" id="btnCam">Take photo</button>
+      <button class="btn ghost" id="btnGal">From gallery</button>
+    </div>
+    <input type="file" id="fileCam" accept="image/*" capture="environment" hidden>
+    <input type="file" id="fileGal" accept="image/*" hidden>
+    <div class="verdict" id="verdict"><button type="button" data-v="ok">OK</button><button type="button" data-v="bad">Not OK</button></div>
+    <div id="defBox" hidden>
+      <div class="small muted" style="margin-top:8px">What is wrong? Tap all that apply.</div>
+      <div class="chips" id="defChips"></div>
+      <label class="f">Note<textarea class="in" id="fNote" rows="2" placeholder="e.g. 1 mm step on inner face, sent for rework"></textarea></label>
+    </div>
+    <button class="btn ghost" id="btnAI" style="margin-top:8px">Check photo with AI</button>
+    <div id="aiBox"></div>
+    <div style="height:90px"></div>
+  </div></div>
+  <div class="bar">
+    <button class="btn ghost" id="btnPrevC" style="width:auto">‹</button>
+    <button class="btn" id="btnNextC">Next corner ›</button>
+  </div>
+</div>
+
+<!-- CAMERA -->
+<div class="sheet" id="cam" role="dialog" aria-modal="true" aria-label="Camera">
+  <video id="vid" playsinline muted></video>
+  <svg class="guide" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <g id="guideG">
+      <rect x="38" y="38" width="58" height="13" fill="rgba(255,206,31,.13)" stroke="#ffce1f" stroke-width=".5" stroke-dasharray="2 1.5"/>
+      <rect x="38" y="38" width="13" height="58" fill="rgba(255,206,31,.13)" stroke="#ffce1f" stroke-width=".5" stroke-dasharray="2 1.5"/>
+      <path d="M38 38 L51 51" stroke="#ffce1f" stroke-width=".9"/>
+    </g>
+  </svg>
+  <div class="hint" id="camHint"></div>
+  <div class="ctl">
+    <button class="ib" id="camCancel">Cancel</button>
+    <button class="shutter" id="camSnap" aria-label="Take photo"></button>
+    <button class="ib" id="camFile">Gallery</button>
+  </div>
+</div>
+
+<!-- ZOOM -->
+<div class="sheet" id="zoom" role="dialog" aria-modal="true" aria-label="Photo">
+  <header class="top"><div class="hrow"><span class="ttl">Tap photo to zoom</span><button class="ib" id="zoomClose">Close</button></div></header>
+  <div class="body"><img id="zoomImg" alt="Corner photo"></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="sheet" id="settings" role="dialog" aria-modal="true" aria-labelledby="setT">
+  <header class="top"><div class="hrow"><span class="ttl" id="setT">Settings</span><button class="ib" id="setClose">Close</button></div></header>
+  <div class="body"><div class="wrap">
+    <div class="panel">
+      <h2>Apps Script link</h2>
+      <p class="muted small" style="margin-top:0">The same /exec link the Field Tools hub uses. It uploads the PDF to Drive, logs the Sheet, and runs the optional AI photo check.</p>
+      <label class="f">Link<input id="fApi" placeholder="https://script.google.com/macros/s/…/exec"></label>
+      <button class="btn" id="setSave">Save</button>
+    </div>
+    <div class="panel">
+      <h2>Waiting to send</h2>
+      <div id="obInfo" class="small muted"></div>
+      <button class="btn ghost" id="btnFlush" style="margin-top:10px">Send now</button>
+    </div>
+  </div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+const PDFJS_W='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const JSPDF='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+
+/* ---------- problems that can be ticked per corner ---------- */
+const DEF={
+  alu:[['gap','Open gap','A slit or light is visible along the 45° cut'],['step','Not flush','One profile edge stands higher than the other'],
+       ['seal','Not sealed','Corner sealant or glue is missing'],['gasket','Gasket gap','Rubber is not joined at the corner'],
+       ['mitre',"Cuts don't meet",'The two 45° cut lines are out of line'],['smear','Sealant smears','Excess sealant left on the face'],
+       ['finish','Scratch / dent','Coating chipped, scratched, dented or crimp marks'],['shade','Shade mismatch','Colour differs between the two profiles'],['other','Other','']],
+  upvc:[['crack','Crack at weld','Hairline crack or white stress mark on the seam'],['step','Not flush','One profile edge stands higher than the other'],
+       ['gasket','Gasket gap','Rubber is not joined at the corner'],['weld','Weld not cleaned','Weld bead left on the face or in grooves'],
+       ['line','Weld line crooked','Seam not straight or off-centre'],['burn','Burn mark','Yellow or brown marks from welding heat'],
+       ['foil','Foil lifting','Lamination lifting, torn or white at the seam'],['finish','Scratch / dent','Surface scratched or dented near the joint'],['other','Other','']]
+};
+const defName=(mat,c)=>(DEF[mat].find(d=>d[0]===c)||[c,c])[1];
+const CORNERS=[['TL','Top left'],['TR','Top right'],['BR','Bottom right'],['BL','Bottom left']];
+const CNAME=Object.fromEntries(CORNERS);
+const ROT={TL:0,TR:90,BR:180,BL:270};
+const VL={ok:'OK',fail:'Not OK',prog:'In progress',todo:'Not checked',skip:'Skipped'};
+const VC={ok:'var(--ok)',fail:'var(--bad)',prog:'var(--prog)',todo:'var(--todo)',skip:'var(--todo)'};
+
+/* ---------- storage ---------- */
+let db;
+const openDB=()=>new Promise((res,rej)=>{const r=indexedDB.open('lingel_corner_check',2);
+  r.onupgradeneeded=()=>{const d=r.result;
+    if(!d.objectStoreNames.contains('jobs'))d.createObjectStore('jobs',{keyPath:'id'});
+    if(!d.objectStoreNames.contains('outbox'))d.createObjectStore('outbox',{keyPath:'id'})};
+  r.onsuccess=()=>{db=r.result;res()};r.onerror=()=>rej(r.error)});
+const idb=(st,mode,fn)=>new Promise(r=>{try{const q=fn(db.transaction(st,mode).objectStore(st));q.onsuccess=()=>r(q.result);q.onerror=()=>r(null)}catch(e){r(null)}});
+const jobsAll=()=>idb('jobs','readonly',s=>s.getAll()).then(x=>x||[]);
+const jobPut=o=>idb('jobs','readwrite',s=>s.put(o));
+const jobDel=id=>idb('jobs','readwrite',s=>s.delete(id));
+
+let J=null,curPos=null,curPart=null,curCorner='TL',view='jobs';
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2800)};
+const supervisor=()=>{try{return JSON.parse(localStorage.getItem('lingel_supervisor')||'{}').name||''}catch(e){return''}};
+const apiLink=()=>{try{return localStorage.getItem('lingel_api')||''}catch(e){return''}};
+const slug=s=>String(s||'').replace(/[\/\\]+/g,'-').replace(/[^\w\-]+/g,'_').replace(/_+/g,'_').slice(0,60)||'NoOffer';
+function setStatus(el,msg,kind){$(el).innerHTML=msg?`<div class="status ${kind||''}">${msg}</div>`:''}
+function loadScript(src){return new Promise((res,rej)=>{if(document.querySelector(`script[src="${src}"]`)&&(src===JSPDF?window.jspdf:window.pdfjsLib))return res();
+  const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('could not load '+src.split('/').pop()+' — check internet'));document.head.appendChild(s)})}
+
+let saveT;
+function save(){if(!J)return;J.updated=Date.now();clearTimeout(saveT);saveT=setTimeout(()=>jobPut(J),250)}
+
+/* ---------- verdicts ---------- */
+function partsOf(p){if(p.skip)return[];
+  return[...Array.from({length:p.frames},(_,i)=>({id:'F'+(i+1),label:'Frame'+(p.frames>1?' '+(i+1):'')})),
+         ...Array.from({length:p.sashes},(_,i)=>({id:'S'+(i+1),label:'Sash '+(i+1)}))]}
+const cornerV=c=>!c?'todo':c.v==='bad'?'fail':c.v==='ok'?'ok':(c.photo?'prog':'todo');
+function posStats(p){const s={t:0,ok:0,bad:0,prog:0};partsOf(p).forEach(pt=>CORNERS.forEach(([k])=>{s.t++;const v=cornerV(p.corners[pt.id+'|'+k]);if(v==='ok')s.ok++;else if(v==='fail')s.bad++;else if(v==='prog')s.prog++}));s.done=s.ok+s.bad;return s}
+function posV(p){if(p.skip||!partsOf(p).length)return'skip';const s=posStats(p);if(s.bad)return'fail';if(s.done===s.t)return'ok';return(s.done||s.prog)?'prog':'todo'}
+function partV(p,pid){const vs=CORNERS.map(([k])=>cornerV(p.corners[pid+'|'+k]));if(vs.includes('fail'))return'fail';if(vs.every(v=>v==='ok'))return'ok';return vs.some(v=>v!=='todo')?'prog':'todo'}
+function jobStats(j){const s={t:0,ok:0,bad:0,prog:0,done:0,pos:0,posBad:0};j.positions.forEach(p=>{if(p.skip||!partsOf(p).length)return;s.pos++;const x=posStats(p);s.t+=x.t;s.ok+=x.ok;s.bad+=x.bad;s.prog+=x.prog;s.done+=x.done;if(x.bad)s.posBad++});return s}
+function jobV(j){const s=jobStats(j);if(!s.t)return'todo';if(s.bad)return'fail';if(s.done===s.t)return'ok';return s.done?'prog':'todo'}
+const pill=v=>`<span class="pill v-${v}">${VL[v]}</span>`;
+const progBar=s=>s.t?`<i style="width:${s.ok/s.t*100}%;background:var(--ok)"></i><i style="width:${s.bad/s.t*100}%;background:var(--bad)"></i>`:'';
+
+/* ---------- navigation ---------- */
+function show(v){view=v;
+  ['jobs','S1','S2','S3','Pos','S4'].forEach(x=>{const el=$('#v'+(x==='jobs'?'Jobs':x));if(el)el.hidden=x!==v});
+  const inJob=v!=='jobs';$('#steps').hidden=!inJob;$('#btnJobs').hidden=!inJob;
+  $('#hdrTitle').textContent=inJob?(J.offer||J.customer||'New job'):'Corner Check';
+  const st=v==='Pos'?3:+String(v).replace('S','')||0;
+  $$('#steps button').forEach(b=>{b.classList.toggle('on',+b.dataset.s===st)});
+  if(inJob){const s=jobStats(J);
+    $('#steps [data-s="1"]').classList.toggle('done',J.positions.length>0&&st!==1);
+    $('#steps [data-s="2"]').classList.toggle('done',!!J.partsSet&&st!==2);
+    $('#steps [data-s="3"]').classList.toggle('done',s.t>0&&s.done===s.t&&st!==3);
+    $('#steps [data-s="4"]').classList.remove('done');
+    J.step=st;save()}
+  window.scrollTo(0,0);
+  if(v==='jobs')renderJobs();if(v==='S1')renderS1();if(v==='S2')renderS2();if(v==='S3')renderS3();if(v==='Pos')renderPos();if(v==='S4')renderS4();
+}
+$('#steps').addEventListener('click',e=>{const b=e.target.closest('button');if(b)goStep(+b.dataset.s)});
+$$('[data-go]').forEach(b=>b.onclick=()=>goStep(+b.dataset.go));
+function goStep(n){if(n>=3&&!J.positions.length){toast('Add positions first — upload the quotation or add one by hand');show(n===3?'S2':'S1');return}
+  if(n>=3)J.partsSet=true;show('S'+n)}
+$('#btnJobs').onclick=()=>{J=null;show('jobs')};
+
+/* ---------- JOBS ---------- */
+function newJob(){return{id:'cj'+Date.now()+Math.random().toString(36).slice(2,6),created:Date.now(),updated:Date.now(),
+  offer:'',customer:'',phone:'',addr:'',material:'alu',stage:'site',by:supervisor(),quoteName:'',positions:[],partsSet:false,step:1}}
+async function renderJobs(){
+  const all=(await jobsAll()).sort((a,b)=>b.updated-a.updated);
+  if(!all.length){$('#jobList').innerHTML='<div class="empty">No jobs yet. Upload a quotation to start.</div>';return}
+  $('#jobList').innerHTML=all.map(j=>{const s=jobStats(j),v=jobV(j);
+    return `<button class="job" data-id="${j.id}"><div class="m"><b>${esc(j.offer||'No offer no.')} · ${esc(j.customer||'—')}</b>
+    <span>${j.positions.length} positions · ${s.done}/${s.t} corners · ${new Date(j.updated).toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</span>
+    <div class="prog" style="margin:6px 0 0">${progBar(s)}</div></div>${pill(v)}</button>`}).join('');
+  $('#jobList').querySelectorAll('.job').forEach(b=>b.onclick=()=>{J=all.find(j=>j.id===b.dataset.id);curPos=null;show(J.step===3?'S3':J.step===4?'S4':'S'+(J.step||1))});
+}
+$('#btnUploadNew').onclick=()=>{$('#fileQuote').dataset.mode='new';$('#fileQuote').click()};
+$('#btnReupload').onclick=()=>{if(J.positions.some(p=>Object.keys(p.corners).length)&&!confirm('Photos already taken stay with positions that keep the same name. Positions not in the new quotation will be removed. Continue?'))return;
+  $('#fileQuote').dataset.mode='re';$('#fileQuote').click()};
+$('#btnManual').onclick=()=>{J=newJob();save();show('S1')};
+$('#fileQuote').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+  const mode=(e.target.dataset.mode==='re'&&J)?'re':'new';e.target.dataset.mode='';const out=mode==='new'?'#jobStatus':'#s1Status';
+  try{setStatus(out,'Reading quotation…');
+    const r=await parseQuotation(f,msg=>setStatus(out,msg));
+    if(mode==='new'){J=newJob()}
+    const old=Object.fromEntries(J.positions.map(p=>[p.ref,p]));
+    J.quoteName=f.name;
+    ['offer','customer','phone','addr'].forEach(k=>{if(r[k]&&(mode==='new'||!J[k]))J[k]=r[k]});
+    if(r.material&&mode==='new')J.material=r.material;
+    J.positions=r.positions.map((p,i)=>{const o=old[p.ref];
+      return o?Object.assign(o,{no:i+1,w:p.w,h:p.h}):Object.assign(p,{no:i+1})});
+    save();
+    if(!r.positions.length)setStatus(out,'No positions found in this PDF. Check it is a Lingel quotation, or add positions by hand in step 2.','err');
+    else setStatus(out,`Found ${r.positions.length} positions${r.offer?' in offer '+esc(r.offer):''}. Drawings are loading…`,'good');
+    show('S1');
+    r.drawings.then(()=>{save();if(view==='S1')setStatus('#s1Status',`Found ${J.positions.length} positions with drawings.`,'good');if(view==='S2')renderS2()}).catch(()=>{});
+  }catch(err){setStatus(out,'Could not read the quotation: '+esc(err.message)+'. You can still start without it.','err')}
+};
+
+/* ---------- quotation parser (agreed suite rule) ---------- */
+function toMM(s){if(s.includes(','))return Math.round(parseFloat(s.replace(/,/g,'')));const n=parseFloat(s);return n<20?Math.round(n*1000):Math.round(n)}
+function guessParts(ref){const r=ref.toUpperCase();
+  if(/SLD|SLID/.test(r))return{frames:1,sashes:2};
+  if(/(^|-)(ADD-)?D\d|DOOR/.test(r))return{frames:1,sashes:1};
+  if(/(^|-)(FF|FIX|FX)\d*(-|$)/.test(r)&&!/(^|-)W\d/.test(r))return{frames:1,sashes:0};
+  return{frames:1,sashes:1}}
+async function parseQuotation(file,progress){
+  await loadScript(PDFJS);pdfjsLib.GlobalWorkerOptions.workerSrc=PDFJS_W;
+  const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+  const lines=[];let full='';
+  for(let pn=1;pn<=pdf.numPages;pn++){
+    progress&&progress(`Reading page ${pn} of ${pdf.numPages}…`);
+    const page=await pdf.getPage(pn);const vp=page.getViewport({scale:1});const tc=await page.getTextContent();
+    const its=tc.items.filter(i=>i.str&&i.str.trim()).map(i=>({s:i.str,x:i.transform[4],y:vp.height-i.transform[5]})).sort((a,b)=>a.y-b.y||a.x-b.x);
+    const rows=[];its.forEach(it=>{const r=rows.find(r=>Math.abs(r.y-it.y)<3);r?r.items.push(it):rows.push({y:it.y,items:[it]})});
+    rows.sort((a,b)=>a.y-b.y).forEach(r=>{r.items.sort((a,b)=>a.x-b.x);
+      const text=r.items.map(i=>i.s).join(' ').replace(/\s+/g,' ').trim();
+      const left=r.items.filter(i=>i.x<185).map(i=>i.s).join(' ').replace(/\s+/g,' ').trim();
+      lines.push({page:pn,y:r.y,text,left,ph:vp.height});full+=text+'\n'});
+  }
+  // a label: number-dash followed by something with a letter (66-W31-4F), or Add-/ADD-
+  const LAB=/^(?:\d{1,4}-\S*[A-Za-z]|add-)/i;
+  const labs=[];lines.forEach((l,i)=>{if(l.left&&LAB.test(l.left))labs.push(i)});
+  const positions=[],seen={},blocks=[];
+  labs.forEach((li,k)=>{
+    const end=k+1<labs.length?labs[k+1]:lines.length;const txt=lines.slice(li,end).map(l=>l.text).join(' ; ');
+    const d={},re=/(?:^|[;\s])([BHLA])\s*=\s*(\d+(?:[.,]\d+)?)/g;let m;
+    while((m=re.exec(txt)))if(!d[m[1]])d[m[1]]=toMM(m[2]);
+    const w=d.B||d.L,h=d.H||d.A;if(!w||!h)return; // charge lines like "Welding Joint" have no size
+    let ref=lines[li].left.replace(/\s*[BHLA]\d*\s*=\s*\d.*$/,'').trim();
+    if(seen[ref]){seen[ref]++;ref=ref+' ('+seen[ref]+')'}else seen[ref]=1;
+    const nx=k+1<labs.length&&lines[labs[k+1]].page===lines[li].page?lines[labs[k+1]].y:null;
+    const g=guessParts(ref);
+    const p={id:'p'+Math.random().toString(36).slice(2,9),ref,w,h,frames:g.frames,sashes:g.sashes,skip:false,drawing:'',corners:{}};
+    positions.push(p);blocks.push({p,page:lines[li].page,y:lines[li].y,ny:nx});
+  });
+  // header details
+  const offerM=full.match(/Offer\s*[-–]?\s*N[or]\.?\s*[:.]?\s*(\d{3,6}\s*\/\s*\d{1,4})/i)||full.match(/Quotation\s*[-–]?\s*N[or]\.?\s*[:.]?\s*(\d{3,6}\s*\/\s*\d{1,4})/i);
+  const out={positions,offer:offerM?offerM[1].replace(/\s/g,''):'',customer:'',phone:'',addr:''};
+  const p1=lines.filter(l=>l.page===1);const HDR=/\s+(?:Offer|Quotation|Date|Page|Customer\s*No|Contact|Sales|Ref)\b.*$/i;
+  const ci=p1.findIndex(l=>/(?:^|\s)(?:Mr|Mrs|Ms|Dr|M\/s|M-s)\.?\s+[A-Za-z]/.test(l.text));
+  if(ci>=0){const m=p1[ci].text.match(/(?:Mr|Mrs|Ms|Dr|M\/s|M-s)\.?\s+.*/);out.customer=m[0].replace(HDR,'').trim().slice(0,60);
+    const addr=[];for(let i=ci+1;i<Math.min(p1.length,ci+7);i++){const t=p1[i].text;const ph=t.match(/(?:\+91[\s-]?)?([6-9]\d{4}\s?\d{5})\b/);
+      if(ph){out.phone=ph[1].replace(/\s/g,'');break}const a=t.replace(HDR,'').trim();if(a&&addr.length<3&&!LAB.test(a))addr.push(a)}
+    out.addr=addr.join(', ').slice(0,140)}
+  const nu=(full.match(/u\s?pvc/gi)||[]).length,na=(full.match(/alumin/gi)||[]).length;
+  out.material=nu>na?'upvc':na?'alu':'';
+  out.drawings=extractDrawings(pdf,blocks);
+  return out;
+}
+async function extractDrawings(pdf,blocks){
+  const byPage={};blocks.forEach(b=>(byPage[b.page]=byPage[b.page]||[]).push(b));
+  for(const pg of Object.keys(byPage)){
+    const page=await pdf.getPage(+pg);const S=2,vp=page.getViewport({scale:S});
+    const cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;const ctx=cv.getContext('2d');
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);await page.render({canvasContext:ctx,viewport:vp}).promise;
+    byPage[pg].forEach(b=>{try{
+      const y0=Math.max(0,b.y-32),y1=Math.min(vp.height/S,b.ny?b.ny-14:b.y+210),x0=18,x1=200;
+      if(y1-y0<20)return;
+      const c=document.createElement('canvas');c.width=(x1-x0)*S;c.height=(y1-y0)*S;const cx=c.getContext('2d');
+      cx.drawImage(cv,x0*S,y0*S,c.width,c.height,0,0,c.width,c.height);
+      const t=trimWhite(c);if(t)b.p.drawing=t;
+    }catch(e){}});
+  }
+}
+function trimWhite(c){const x=c.getContext('2d'),d=x.getImageData(0,0,c.width,c.height).data;let a=c.width,b=c.height,r=-1,s=-1;
+  for(let y=0;y<c.height;y++)for(let X=0;X<c.width;X++){const i=(y*c.width+X)*4;if(d[i]+d[i+1]+d[i+2]<690){if(X<a)a=X;if(X>r)r=X;if(y<b)b=y;if(y>s)s=y}}
+  if(r<0)return'';const P=6;a=Math.max(0,a-P);b=Math.max(0,b-P);r=Math.min(c.width,r+P);s=Math.min(c.height,s+P);
+  const w=r-a,h=s-b,k=Math.min(1,560/Math.max(w,h));const o=document.createElement('canvas');o.width=Math.round(w*k);o.height=Math.round(h*k);
+  const ox=o.getContext('2d');ox.fillStyle='#fff';ox.fillRect(0,0,o.width,o.height);ox.drawImage(c,a,b,w,h,0,0,o.width,o.height);return o.toDataURL('image/jpeg',.82)}
+
+/* ---------- STEP 1 ---------- */
+function renderS1(){
+  $('#quoteInfo').innerHTML=J.quoteName?`<div class="small">📄 ${esc(J.quoteName)}<br><span class="muted">${J.positions.length} positions</span></div>`:'<div class="small muted">No quotation uploaded. Add positions by hand in step 2, or upload one now.</div>';
+  $('#btnReupload').textContent=J.quoteName?'Upload quotation again':'Upload quotation';
+  $('#fOffer').value=J.offer;$('#fPhone').value=J.phone;$('#fCust').value=J.customer;$('#fAddr').value=J.addr;$('#fBy').value=J.by;
+  $$('#segMat button').forEach(b=>b.classList.toggle('on',b.dataset.v===J.material));
+  $$('#segStage button').forEach(b=>b.classList.toggle('on',b.dataset.v===J.stage));
+}
+[['#fOffer','offer'],['#fPhone','phone'],['#fCust','customer'],['#fAddr','addr'],['#fBy','by']].forEach(([id,k])=>$(id).addEventListener('input',e=>{J[k]=e.target.value.trim();save();if(k==='offer'||k==='customer')$('#hdrTitle').textContent=J.offer||J.customer||'New job'}));
+$('#segMat').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.dataset.v===J.material)return;
+  if(J.positions.some(p=>Object.values(p.corners).some(c=>c.defects&&c.defects.length))&&!confirm('Problem ticks are different for each material and will be cleared (photos and OK/Not OK stay). Continue?'))return;
+  J.material=b.dataset.v;J.positions.forEach(p=>Object.values(p.corners).forEach(c=>c.defects=[]));save();renderS1()});
+$('#segStage').addEventListener('click',e=>{const b=e.target.closest('button');if(b){J.stage=b.dataset.v;save();renderS1()}});
+
+/* ---------- STEP 2 ---------- */
+function renderS2(){
+  if(!J.positions.length){$('#s2List').innerHTML='<div class="empty">No positions yet. Upload the quotation in step 1, or add one by hand below.</div>';$('#addPos').open=true;return}
+  $('#s2List').innerHTML=J.positions.map((p,i)=>`<div class="pc ${p.skip?'skip':''}" style="flex-wrap:wrap" data-i="${i}">
+    ${p.drawing?`<div class="dr" style="background-image:url(${p.drawing})"></div>`:'<div class="dr none">no drawing</div>'}
+    <div class="m"><b>#${i+1} ${esc(p.ref)}</b><span>${p.w} × ${p.h} mm</span>
+      <div class="cnts">
+        <div class="cnt">Frames <button data-a="f-" aria-label="Fewer frames">−</button><b>${p.frames}</b><button data-a="f+" aria-label="More frames">+</button></div>
+        <div class="cnt">Sashes <button data-a="s-" aria-label="Fewer sashes">−</button><b>${p.sashes}</b><button data-a="s+" aria-label="More sashes">+</button></div>
+        <button class="ib skipb ${p.skip?'on':''}" data-a="skip">${p.skip?'Skipped':'Skip'}</button>
+      </div></div></div>`).join('');
+}
+$('#s2List').addEventListener('click',e=>{const b=e.target.closest('button[data-a]');if(!b)return;const p=J.positions[+b.closest('.pc').dataset.i];
+  const a=b.dataset.a;if(a==='f-')p.frames=Math.max(0,p.frames-1);if(a==='f+')p.frames=Math.min(4,p.frames+1);
+  if(a==='s-')p.sashes=Math.max(0,p.sashes-1);if(a==='s+')p.sashes=Math.min(8,p.sashes+1);if(a==='skip')p.skip=!p.skip;
+  if(!p.frames&&!p.sashes&&a!=='skip')toast('A position with no frame and no sash is left out of the check');
+  J.partsSet=true;save();renderS2()});
+$('#btnAddPos').onclick=()=>{const ref=$('#apRef').value.trim(),w=+$('#apW').value,h=+$('#apH').value;
+  if(!ref){toast('Enter a position name');return}
+  const g=guessParts(ref);J.positions.push({id:'p'+Math.random().toString(36).slice(2,9),ref,w:w||0,h:h||0,frames:g.frames,sashes:g.sashes,skip:false,drawing:'',corners:{}});
+  $('#apRef').value=$('#apW').value=$('#apH').value='';save();renderS2();toast('Position added')};
+
+/* ---------- STEP 3 ---------- */
+function renderS3(){
+  const s=jobStats(J);$('#s3Count').textContent=`${s.done} / ${s.t}`;$('#s3Bar').innerHTML=progBar(s);
+  const act=J.positions.filter(p=>!p.skip&&partsOf(p).length);
+  if(!act.length){$('#s3List').innerHTML='<div class="empty">No positions to check. Set frames and sashes in step 2.</div>';return}
+  $('#s3List').innerHTML=J.positions.map((p,i)=>{if(p.skip||!partsOf(p).length)return'';const st=posStats(p);
+    const minis=partsOf(p).map(pt=>{const c=k=>`<i style="background:${VC[cornerV(p.corners[pt.id+'|'+k])]}"></i>`;return `<span class="mini" title="${pt.label}">${c('TL')}${c('TR')}${c('BL')}${c('BR')}</span>`}).join('');
+    return `<button class="pc" data-i="${i}">${p.drawing?`<div class="dr" style="background-image:url(${p.drawing})"></div>`:'<div class="dr none">#'+(i+1)+'</div>'}
+    <div class="m"><b>#${i+1} ${esc(p.ref)}</b><span>${st.done}/${st.t} corners · ${p.frames} frame, ${p.sashes} sash</span><div class="minis">${minis}</div></div>${pill(posV(p))}</button>`}).join('');
+}
+$('#s3List').addEventListener('click',e=>{const b=e.target.closest('.pc');if(b){curPos=J.positions[+b.dataset.i];curPart=null;show('Pos')}});
+
+/* ---------- POSITION ---------- */
+function renderPos(){
+  const p=curPos,parts=partsOf(p);if(!parts.find(x=>x.id===curPart))curPart=parts[0]&&parts[0].id;
+  const i=J.positions.indexOf(p);
+  $('#posRef').textContent=`#${i+1} ${p.ref}`;$('#posSize').textContent=p.w?`${p.w} × ${p.h} mm`:'';$('#posPill').innerHTML=pill(posV(p));
+  $('#posImg').hidden=!p.drawing;if(p.drawing)$('#posImg').src=p.drawing;
+  $('#tabs').innerHTML=parts.map(pt=>`<button role="tab" class="${pt.id===curPart?'on':''}" data-p="${pt.id}"><i class="dot" style="background:${VC[partV(p,pt.id)]}"></i>${pt.label}</button>`).join('');
+  const win=$('#win');win.classList.toggle('sash',curPart&&curPart[0]==='S');win.querySelectorAll('.cn').forEach(n=>n.remove());
+  CORNERS.forEach(([k,name])=>{const c=p.corners[curPart+'|'+k],v=cornerV(c);
+    const b=document.createElement('button');b.className='cn '+k+' '+v;b.dataset.k=k;b.setAttribute('aria-label',`${name}: ${VL[v]}`);
+    if(c&&c.photo)b.style.backgroundImage=`url(${c.photo.src})`;
+    else b.innerHTML=`<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#8d96a3" stroke-width="1.6"><path d="M3 8h3l2-3h8l2 3h3v11H3z"/><circle cx="12" cy="13" r="3.5"/></svg>`;
+    b.insertAdjacentHTML('beforeend',`<span class="lb"><span>${name}</span><span style="color:${VC[v]}">${v==='todo'?'':VL[v]}</span></span>`);win.appendChild(b)});
+  const pt=parts.find(x=>x.id===curPart);const done=CORNERS.filter(([k])=>['ok','fail'].includes(cornerV(p.corners[curPart+'|'+k]))).length;
+  $('#partName').textContent=pt?pt.label:'';$('#partProg').textContent=`${done} of 4 corners checked`;
+  const act=activeIdx();const ai=act.indexOf(i);$('#btnPrevPos').disabled=ai<=0;$('#btnNextPos').disabled=ai>=act.length-1;
+}
+const activeIdx=()=>J.positions.map((p,i)=>(!p.skip&&partsOf(p).length)?i:-1).filter(i=>i>=0);
+$('#tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b){curPart=b.dataset.p;renderPos()}});
+$('#win').addEventListener('click',e=>{const b=e.target.closest('.cn');if(b)openCorner(b.dataset.k)});
+$('#btnPosBack').onclick=()=>show('S3');
+const stepPos=d=>{const act=activeIdx();const ai=act.indexOf(J.positions.indexOf(curPos))+d;if(ai>=0&&ai<act.length){curPos=J.positions[act[ai]];curPart=null;renderPos();window.scrollTo(0,0)}};
+$('#btnPrevPos').onclick=()=>stepPos(-1);$('#btnNextPos').onclick=()=>stepPos(1);
+
+/* ---------- CORNER SHEET ---------- */
+const key=()=>curPart+'|'+curCorner;
+const cObj=create=>{if(!curPos.corners[key()]&&create)curPos.corners[key()]={defects:[]};return curPos.corners[key()]};
+const partLabel=()=>(partsOf(curPos).find(x=>x.id===curPart)||{}).label||'';
+function openCorner(k){curCorner=k;$('#sheet').classList.add('on');$('#sheet .body').scrollTop=0;renderCorner()}
+function renderCorner(){
+  const c=cObj(false),i=J.positions.indexOf(curPos);
+  $('#shTitle').textContent=`#${i+1} · ${partLabel()} · ${CNAME[curCorner]}`;
+  const v=cornerV(c);$('#shVerdict').className='pill v-'+v;$('#shVerdict').textContent=VL[v];
+  $('#ph').innerHTML=c&&c.photo?`<img src="${c.photo.src}" alt="Corner photo">`
+    :`<div class="none"><svg width="48" height="48" viewBox="0 0 48 48" style="transform:rotate(${ROT[curCorner]}deg)"><path d="M10 10h32M10 10v32" stroke="#ffce1f" stroke-width="5" fill="none"/><path d="M10 10l8 8" stroke="#ffce1f" stroke-width="1.5"/></svg><br>No photo yet. Get close so the joint fills the frame.</div>`;
+  $('#btnCam').textContent=c&&c.photo?'Retake photo':'Take photo';
+  $('#qwarn').innerHTML=c&&c.warn&&c.warn.length?`<div class="warn">${c.warn.map(esc).join('<br>')}</div>`:'';
+  $$('#verdict button').forEach(b=>b.classList.toggle('on',!!c&&c.v===b.dataset.v));
+  $('#defBox').hidden=!(c&&c.v==='bad');
+  $('#defChips').innerHTML=DEF[J.material].map(([k,n,h])=>`<button type="button" data-d="${k}" title="${esc(h)}" class="${c&&c.defects&&c.defects.includes(k)?'on':''}">${esc(n)}</button>`).join('');
+  $('#fNote').value=c&&c.note||'';
+  $('#btnAI').disabled=!(c&&c.photo);
+  $('#aiBox').innerHTML=c&&c.ai?`<div class="ai"><b>AI view:</b> ${esc(c.ai.summary)}${c.ai.retake?`<br><span class="muted">Retake advised: ${esc(c.ai.retake)}</span>`:''}<br><span class="muted small">Suggestion only — confirm with your own eyes.</span></div>`:'';
+  const seq=cornerSeq(),at=seq.findIndex(s=>s.p===curPos&&s.part===curPart&&s.k===curCorner);
+  $('#btnPrevC').disabled=at<=0;$('#btnNextC').textContent=at>=seq.length-1?'Finish':'Next corner ›';
+}
+function cornerSeq(){const out=[];J.positions.forEach(p=>partsOf(p).forEach(pt=>CORNERS.forEach(([k])=>out.push({p,part:pt.id,k}))));return out}
+function moveCorner(d){const seq=cornerSeq(),at=seq.findIndex(s=>s.p===curPos&&s.part===curPart&&s.k===curCorner),n=seq[at+d];
+  if(!n){closeSheet();if(d>0){toast('All corners done');show('S4')}return}
+  if(n.p!==curPos){toast(`Next: #${J.positions.indexOf(n.p)+1} ${n.p.ref}`)}
+  curPos=n.p;curPart=n.part;curCorner=n.k;$('#sheet .body').scrollTop=0;renderCorner()}
+$('#btnNextC').onclick=()=>moveCorner(1);$('#btnPrevC').onclick=()=>moveCorner(-1);
+function closeSheet(){$('#sheet').classList.remove('on');if(view==='Pos')renderPos();else if(view==='S4')renderS4()}
+$('#btnShClose').onclick=closeSheet;
+$('#verdict').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const c=cObj(true);
+  if(b.dataset.v==='ok'&&!c.photo&&!confirm('No photo for this corner. Mark it OK anyway?'))return;
+  c.v=c.v===b.dataset.v?undefined:b.dataset.v;if(c.v!=='bad')c.defects=[];save();renderCorner()});
+$('#defChips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const c=cObj(true);c.defects=c.defects||[];
+  const k=b.dataset.d;c.defects=c.defects.includes(k)?c.defects.filter(x=>x!==k):[...c.defects,k];save();renderCorner()});
+$('#fNote').addEventListener('input',e=>{cObj(true).note=e.target.value;save()});
+$('#ph').addEventListener('click',()=>{const c=cObj(false);if(c&&c.photo){$('#zoomImg').src=c.photo.src;$('#zoom').classList.remove('z2');$('#zoom').classList.add('on')}});
+$('#zoomImg').onclick=()=>$('#zoom').classList.toggle('z2');$('#zoomClose').onclick=()=>$('#zoom').classList.remove('on');
+
+/* ---------- photos: compress, time + GPS stamp, quality check ---------- */
+let geo=null;
+function getGeo(){return new Promise(res=>{if(geo&&Date.now()-geo.t<60000)return res(geo);if(!navigator.geolocation)return res(geo);
+  const to=setTimeout(()=>res(geo),6000);
+  navigator.geolocation.getCurrentPosition(p=>{clearTimeout(to);geo={lat:+p.coords.latitude.toFixed(5),lng:+p.coords.longitude.toFixed(5),acc:Math.round(p.coords.accuracy),t:Date.now()};res(geo)},
+    ()=>{clearTimeout(to);res(geo)},{enableHighAccuracy:true,timeout:6000,maximumAge:60000})})}
+const loadImg=src=>new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src});
+function drawJpeg(src,w,h,max,q,stamp){const s=Math.min(1,max/Math.max(w,h));const cv=document.createElement('canvas');cv.width=Math.round(w*s);cv.height=Math.round(h*s);
+  const x=cv.getContext('2d');x.drawImage(src,0,0,cv.width,cv.height);
+  if(stamp){const fs=Math.max(13,Math.round(cv.width/48)),bh=fs*2.9;x.fillStyle='rgba(0,0,0,.58)';x.fillRect(0,cv.height-bh,cv.width,bh);
+    x.fillStyle='#fff';x.font=`600 ${fs}px Archivo,Arial,sans-serif`;x.fillText(stamp[0],fs*.6,cv.height-bh+fs*1.2);
+    x.fillStyle='#ffce1f';x.font=`${fs*.9}px Archivo,Arial,sans-serif`;x.fillText(stamp[1],fs*.6,cv.height-bh+fs*2.4)}
+  return cv.toDataURL('image/jpeg',q)}
+function quality(img){const w=256,h=Math.max(1,Math.round(img.height/img.width*256));const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+  const x=cv.getContext('2d');x.drawImage(img,0,0,w,h);const d=x.getImageData(0,0,w,h).data;const g=new Float32Array(w*h);let sum=0;
+  for(let i=0;i<w*h;i++){const v=.299*d[i*4]+.587*d[i*4+1]+.114*d[i*4+2];g[i]=v;sum+=v}
+  let s1=0,s2=0,n=0;const hh=Math.floor(h*.85); // ignore the stamp bar
+  for(let y=1;y<hh-1;y++)for(let X=1;X<w-1;X++){const i=y*w+X,l=g[i-w]+g[i+w]+g[i-1]+g[i+1]-4*g[i];s1+=l;s2+=l*l;n++}
+  const sharp=s2/n-(s1/n)**2,mean=sum/(w*h),out=[];
+  if(sharp<40)out.push('Photo looks blurry. Hold steady, tap the screen to focus, and retake.');
+  if(mean<55)out.push('Photo is too dark. Add light or use the phone torch.');
+  if(mean>215)out.push('Photo is too bright. Avoid direct sun or flash glare on the joint.');return out}
+async function savePhoto(src,w,h){
+  const g=await getGeo();const now=new Date();const i=J.positions.indexOf(curPos)+1;
+  const stamp=[`${J.offer||'—'} · #${i} ${curPos.ref} · ${partLabel()} · ${CNAME[curCorner]}`,
+    `${now.toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}${g?`  ·  ${g.lat}, ${g.lng} ±${g.acc}m`:''}`];
+  const url=drawJpeg(src,w,h,1280,.8,stamp);const img=await loadImg(url);
+  const c=cObj(true);c.photo={src:url,at:now.getTime(),lat:g&&g.lat,lng:g&&g.lng,acc:g&&g.acc};c.warn=quality(img);c.ai=null;
+  save();renderCorner();if(!c.warn.length)toast('Photo saved — now tap OK or Not OK');
+}
+async function fromFile(f){if(!f)return;const r=new FileReader();r.onload=async()=>{const i=await loadImg(r.result);await savePhoto(i,i.width,i.height)};r.readAsDataURL(f)}
+$('#fileCam').onchange=e=>{fromFile(e.target.files[0]);e.target.value=''};
+$('#fileGal').onchange=e=>{fromFile(e.target.files[0]);e.target.value=''};
+$('#btnGal').onclick=()=>$('#fileGal').click();
+let stream=null;
+async function openCam(){getGeo();
+  $('#guideG').setAttribute('transform',`rotate(${ROT[curCorner]} 50 50)`);
+  $('#camHint').textContent=`${partLabel()} · ${CNAME[curCorner]} — line the joint up with the yellow corner`;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){$('#fileCam').click();return}
+  $('#cam').classList.add('on');
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1440}},audio:false});
+    const v=$('#vid');v.srcObject=stream;await v.play()}catch(e){closeCam();$('#fileCam').click()}}
+function closeCam(){$('#cam').classList.remove('on');if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
+$('#btnCam').onclick=openCam;$('#camCancel').onclick=closeCam;$('#camFile').onclick=()=>{closeCam();$('#fileGal').click()};
+$('#camSnap').onclick=async()=>{const v=$('#vid');if(!v.videoWidth)return;const w=v.videoWidth,h=v.videoHeight;
+  const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(v,0,0);closeCam();await savePhoto(cv,w,h)};
+
+/* ---------- optional AI check (Apps Script → Claude) ---------- */
+$('#btnAI').onclick=async()=>{
+  const api=apiLink();if(!api){toast('Add the Apps Script link in Settings first');openSettings();return}
+  const c=cObj(false);if(!c||!c.photo)return;const btn=$('#btnAI');btn.disabled=true;btn.textContent='Checking photo…';
+  try{const img=await loadImg(c.photo.src);const b64=drawJpeg(img,img.width,img.height,1024,.8).split(',')[1];
+    const items=DEF[J.material].filter(d=>d[0]!=='other').map(d=>({c:d[0],t:'Look for: '+d[1],h:d[2]}));
+    const r=await fetch(api,{method:'POST',body:new URLSearchParams({action:'cornerCheck',material:J.material==='alu'?'aluminium':'uPVC',part:partLabel(),corner:CNAME[curCorner],items:JSON.stringify(items),image:b64})});
+    const j=await r.json();if(!j.ok)throw new Error(j.error||'no answer');
+    const bad=Object.entries(j.items||{}).filter(([,v])=>v==='bad').map(([k])=>k);
+    c.ai={summary:j.summary||'',retake:j.retake||'',bad,at:Date.now()};
+    if(!c.v){if(bad.length){c.v='bad';c.defects=bad}else if(Object.values(j.items||{}).filter(v=>v==='ok').length>=items.length/2)c.v='ok'}
+    save();renderCorner();toast('AI suggestion added — confirm it');
+  }catch(e){toast('AI check failed ('+e.message+'). Judge it by eye.')}
+  finally{btn.textContent='Check photo with AI';btn.disabled=false}
+};
+
+/* ---------- STEP 4: report ---------- */
+function problems(){const cnt={},list=[];
+  J.positions.forEach((p,i)=>partsOf(p).forEach(pt=>CORNERS.forEach(([k])=>{const c=p.corners[pt.id+'|'+k];
+    if(c&&c.v==='bad'){(c.defects&&c.defects.length?c.defects:['other']).forEach(d=>cnt[d]=(cnt[d]||0)+1);list.push({i,p,pt,k,c})}})));
+  return{cnt,list}}
+function renderS4(){
+  const s=jobStats(J);const pend=s.t-s.done;
+  $('#s4Stat').innerHTML=`<div><b>${s.pos}</b><span>positions</span></div><div><b style="color:var(--ok)">${s.ok}</b><span>corners OK</span></div><div><b style="color:var(--bad)">${s.bad}</b><span>not OK</span></div><div><b>${pend}</b><span>not checked</span></div>`;
+  $('#s4Bar').innerHTML=progBar(s);
+  const {cnt,list}=problems();
+  $('#s4AllOk').innerHTML=s.t&&!s.bad&&!pend?'<div class="allok">✓ All corners OK</div>':'';
+  $('#s4DefPanel').hidden=!list.length;$('#s4NokPanel').hidden=!list.length;
+  const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]),max=top.length?top[0][1]:1;
+  $('#s4Def').innerHTML=top.map(([k,n])=>`<div class="hbar"><div class="t"><span>${esc(defName(J.material,k))}</span><b class="mono">${n}</b></div><div class="b"><i style="width:${n/max*100}%"></i></div></div>`).join('');
+  $('#s4Nok').innerHTML=list.map((x,n)=>`<button class="nok" data-n="${n}">${x.c.photo?`<img src="${x.c.photo.src}" alt="">`:'<img alt="">'}
+    <div class="m"><b>#${x.i+1} ${esc(x.p.ref)} · ${x.pt.label} · ${CNAME[x.k]}</b><span class="muted">${esc((x.c.defects||[]).map(d=>defName(J.material,d)).join(', ')||'No problem ticked')}${x.c.note?' — '+esc(x.c.note):''}</span></div></button>`).join('');
+  $('#s4Nok').querySelectorAll('.nok').forEach(b=>b.onclick=()=>{const x=list[+b.dataset.n];curPos=x.p;curPart=x.pt.id;openCorner(x.k)});
+}
+
+/* PDF (jsPDF, drawn directly) */
+const asc=s=>String(s??'').replace(/×/g,'x').replace(/[–—]/g,'-').replace(/[^\x20-\x7E\u00A0-\u00FF]/g,'');
+const shrinkCache={};
+async function shrink(src,max){const k=src.length+':'+max;if(shrinkCache[k])return shrinkCache[k];const i=await loadImg(src);return shrinkCache[k]=drawJpeg(i,i.width,i.height,max,.72)}
+async function makePDF(){
+  await loadScript(JSPDF);const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});
+  const W=210,H=297,M=12,NAVY=[22,41,77],RED=[200,16,46],OK=[17,131,79],BAD=[194,29,29],GR=[110,110,110];
+  const col=v=>v==='ok'?OK:v==='fail'?BAD:GR;let y=0;
+  let logo='';try{logo=localStorage.getItem('lingel_logo')||''}catch(e){}
+  const header=()=>{doc.setFillColor(...NAVY);doc.rect(0,0,W,16,'F');doc.setFillColor(...RED);doc.rect(0,16,W,1.2,'F');
+    let drew=false;if(logo){try{const pr=doc.getImageProperties(logo);const h=9,w=Math.min(28,h*pr.width/pr.height);doc.setFillColor(255,255,255);doc.roundedRect(M-1.5,2.5,w+3,11,1.5,1.5,'F');doc.addImage(logo,'JPEG',M,3.5,w,h);drew=true}catch(e){}}
+    if(!drew){doc.setTextColor(255,206,31);doc.setFont('helvetica','bold');doc.setFontSize(15);doc.text('LINGEL',M,10.8)}
+    doc.setTextColor(255);doc.setFont('helvetica','bold');doc.setFontSize(11.5);doc.text('Corner Joint Check',W-M,7.6,{align:'right'});
+    doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.text(asc(`Offer ${J.offer||'-'}  |  ${J.customer||''}`).slice(0,80),W-M,12.6,{align:'right'});y=24};
+  const need=h=>{if(y+h>H-14){doc.addPage();header()}};
+  header();
+  // order box
+  const info=[['Offer no.',J.offer],['Customer',J.customer],['Phone',J.phone],['Site',J.addr],['Material',J.material==='alu'?'Aluminium':'uPVC'],['Checked at',J.stage==='factory'?'Factory':'Site'],['Checked by',J.by],['Date',new Date().toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})]];
+  doc.setDrawColor(200);doc.setLineWidth(.3);doc.roundedRect(M,y,W-2*M,32,2,2);doc.setFontSize(9);
+  info.forEach(([l,v],n)=>{const cx=M+4+(n%2)*93,cy=y+6.5+Math.floor(n/2)*7;doc.setTextColor(...GR);doc.setFont('helvetica','normal');doc.text(l,cx,cy);
+    doc.setTextColor(20);doc.setFont('helvetica','bold');doc.text(doc.splitTextToSize(asc(v||'-'),64)[0],cx+22,cy)});
+  y+=38;
+  // summary
+  const s=jobStats(J),pend=s.t-s.done;const boxes=[['Positions',s.pos,[20,20,20]],['Corners OK',s.ok,OK],['Not OK',s.bad,BAD],['Not checked',pend,GR]];
+  const bw=(W-2*M-9)/4;boxes.forEach(([l,v,c],n)=>{const x=M+n*(bw+3);doc.setFillColor(244,245,247);doc.roundedRect(x,y,bw,18,2,2,'F');
+    doc.setTextColor(...c);doc.setFont('helvetica','bold');doc.setFontSize(17);doc.text(String(v),x+bw/2,y+9.5,{align:'center'});
+    doc.setTextColor(...GR);doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.text(l,x+bw/2,y+15,{align:'center'})});
+  y+=22;
+  if(s.t){const bwid=W-2*M;doc.setFillColor(230,232,236);doc.roundedRect(M,y,bwid,3.5,1.5,1.5,'F');
+    if(s.ok){doc.setFillColor(...OK);doc.rect(M,y,bwid*s.ok/s.t,3.5,'F')}if(s.bad){doc.setFillColor(...BAD);doc.rect(M+bwid*s.ok/s.t,y,bwid*s.bad/s.t,3.5,'F')}}
+  y+=10;
+  const {list}=problems();
+  if(s.t&&!s.bad&&!pend){doc.setDrawColor(...OK);doc.setLineWidth(.8);doc.roundedRect(W/2-45,y,90,20,3,3);doc.roundedRect(W/2-43.5,y+1.5,87,17,2.5,2.5);
+    doc.setTextColor(...OK);doc.setFont('helvetica','bold');doc.setFontSize(15);doc.text('ALL CORNERS OK',W/2,y+10,{align:'center'});
+    doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.text(`${s.t} corners checked, no problems found`,W/2,y+15.5,{align:'center'});y+=28}
+  if(list.length){
+    doc.setTextColor(...BAD);doc.setFont('helvetica','bold');doc.setFontSize(11);doc.text(`CORNERS NOT OK (${list.length})`,M,y);y+=3;
+    const cols=[['#',9],['Position',42],['Part',20],['Corner',22],['Problem',50],['Note',W-2*M-143]];
+    const head=()=>{doc.setFillColor(...NAVY);doc.rect(M,y,W-2*M,6.5,'F');doc.setTextColor(255);doc.setFontSize(8.5);doc.setFont('helvetica','bold');let x=M;cols.forEach(([t,w])=>{doc.text(t,x+1.5,y+4.5);x+=w});y+=6.5};
+    head();doc.setFont('helvetica','normal');
+    list.forEach((r,n)=>{const vals=[String(r.i+1),r.p.ref,r.pt.label,CNAME[r.k],(r.c.defects||[]).map(d=>defName(J.material,d)).join(', ')||'-',r.c.note||''];
+      const wr=vals.map((v,j)=>doc.splitTextToSize(asc(v),cols[j][1]-3));const rh=Math.max(...wr.map(w=>w.length))*3.8+2.6;
+      if(y+rh>H-14){doc.addPage();header();head();doc.setFont('helvetica','normal')}
+      if(n%2){doc.setFillColor(247,247,249);doc.rect(M,y,W-2*M,rh,'F')}
+      doc.setTextColor(25);doc.setFontSize(8.5);let x=M;wr.forEach((w,j)=>{doc.text(w,x+1.5,y+4);x+=cols[j][1]});y+=rh});
+    doc.setDrawColor(210);doc.line(M,y,W-M,y);y+=8}
+  if(pend&&s.t){need(8);doc.setTextColor(...GR);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text(`${pend} corner(s) were not checked and are marked "not checked" below.`,M,y);y+=8}
+  // per position
+  const DW=30,PX=M+DW+4,PW=W-M-PX,ph_w=(PW-6)/4,ph_h=ph_w*.75;
+  for(const [i,p] of J.positions.entries()){
+    const parts=partsOf(p);if(!parts.length)continue;const pv=posV(p);
+    need(12+ph_h+14);
+    doc.setFillColor(238,240,244);doc.rect(M,y,W-2*M,8,'F');doc.setFillColor(...col(pv));doc.rect(M,y,1.6,8,'F');
+    doc.setTextColor(20);doc.setFont('helvetica','bold');doc.setFontSize(10.5);doc.text(asc(`#${i+1}  ${p.ref}`).slice(0,60),M+4,y+5.4);
+    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...GR);doc.text(p.w?`${p.w} x ${p.h} mm`:'',W-M-32,y+5.4,{align:'right'});
+    doc.setTextColor(...col(pv));doc.setFont('helvetica','bold');doc.text(VL[pv].toUpperCase(),W-M-3,y+5.4,{align:'right'});y+=11;
+    const top=y;
+    if(p.drawing){try{const pr=doc.getImageProperties(p.drawing);let w=DW,h=w*pr.height/pr.width;if(h>45){h=45;w=h*pr.width/pr.height}doc.addImage(p.drawing,'JPEG',M,y,w,h)}catch(e){}}
+    for(const pt of parts){
+      need(ph_h+14);if(y<top)y=top;
+      doc.setTextColor(40);doc.setFont('helvetica','bold');doc.setFontSize(9);doc.text(pt.label,PX,y+3);
+      const pvv=partV(p,pt.id);doc.setTextColor(...col(pvv));doc.text(VL[pvv],W-M,y+3,{align:'right'});y+=4.5;
+      let maxCap=0;
+      for(const [n,k] of ['TL','TR','BL','BR'].entries()){
+        const c=p.corners[pt.id+'|'+k],v=cornerV(c),x=PX+n*(ph_w+2);
+        if(c&&c.photo){try{doc.addImage(await shrink(c.photo.src,520),'JPEG',x,y,ph_w,ph_h)}catch(e){}}
+        else{doc.setFillColor(236,237,240);doc.rect(x,y,ph_w,ph_h,'F');doc.setTextColor(150);doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.text('no photo',x+ph_w/2,y+ph_h/2,{align:'center'})}
+        doc.setDrawColor(...col(v));doc.setLineWidth(v==='fail'?.8:.3);doc.rect(x,y,ph_w,ph_h);
+        let cy=y+ph_h+3.2;doc.setFontSize(7.8);doc.setFont('helvetica','bold');doc.setTextColor(40);doc.text(CNAME[k],x,cy);
+        doc.setTextColor(...col(v));doc.text(v==='fail'?'NOT OK':v==='ok'?'OK':'-',x+ph_w,cy,{align:'right'});
+        doc.setFont('helvetica','normal');doc.setFontSize(7);
+        if(c&&c.v==='bad'){const t=doc.splitTextToSize(asc((c.defects||[]).map(d=>defName(J.material,d)).join(', ')+(c.note?' - '+c.note:'')),ph_w).slice(0,3);doc.setTextColor(...BAD);doc.text(t,x,cy+3);cy+=t.length*2.8}
+        if(c&&c.photo&&c.photo.at){doc.setTextColor(140);doc.text(asc(new Date(c.photo.at).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})),x,cy+3);cy+=2.8}
+        maxCap=Math.max(maxCap,cy-(y+ph_h))}
+      y+=ph_h+maxCap+4}
+    y=Math.max(y,top+47)+3}
+  const n=doc.getNumberOfPages();for(let i=1;i<=n;i++){doc.setPage(i);doc.setFontSize(7.5);doc.setTextColor(150);doc.setFont('helvetica','normal');
+    doc.text(asc(`Lingel Windows & Doors  |  Corner joint check  |  ${J.offer||''}`),M,H-6);doc.text(`Page ${i} of ${n}`,W-M,H-6,{align:'right'})}
+  return doc;
+}
+
+/* one tap: download → Drive → Sheet, with an outbox for offline */
+const obAll=()=>idb('outbox','readonly',s=>s.getAll()).then(x=>(x||[]).sort((a,b)=>a.ts-b.ts));
+const obPut=o=>idb('outbox','readwrite',s=>s.put(o));const obDel=id=>idb('outbox','readwrite',s=>s.delete(id));
+let flushing=false;
+async function flushOutbox(){if(flushing)return{sent:0,left:0};flushing=true;let sent=0,err='';
+  try{const api=apiLink();const jobs=await obAll();if(!api||!jobs.length)return{sent,left:jobs.length};
+    for(const j of jobs){try{const r=await fetch(api,{method:'POST',body:new URLSearchParams(j.params)});const t=await r.text();let o={};try{o=JSON.parse(t)}catch(e){}
+      if(!r.ok||o.ok===false)throw new Error(o.error||('HTTP '+r.status));await obDel(j.id);sent++}catch(e){err=e.message}}
+    const left=(await obAll()).length;return{sent,left,err}}finally{flushing=false}}
+function reportParams(){const s=jobStats(J),{list}=problems();
+  return{action:'cornerLog',offerNo:J.offer,customer:J.customer,phone:J.phone,site:J.addr,material:J.material==='alu'?'Aluminium':'uPVC',
+    stage:J.stage==='factory'?'Factory':'Site',checkedBy:J.by||supervisor(),positions:String(s.pos),corners:String(s.t),ok:String(s.ok),notOk:String(s.bad),notChecked:String(s.t-s.done),
+    result:VL[jobV(J)],problems:list.map(x=>`#${x.i+1} ${x.p.ref} ${x.pt.label} ${CNAME[x.k]}: ${(x.c.defects||[]).map(d=>defName(J.material,d)).join('/')||'-'}`).join(' | ')}}
+$('#btnPDF').onclick=async()=>{
+  const btn=$('#btnPDF');btn.disabled=true;
+  try{setStatus('#s4Status','Building the PDF…');const doc=await makePDF();const name=`CornerCheck_${slug(J.offer)}.pdf`;doc.save(name);
+    let api=apiLink();if(!api){api=(prompt('PDF downloaded. Paste the Apps Script /exec link to also upload to Drive and log the Sheet:')||'').trim();if(api)localStorage.setItem('lingel_api',api)}
+    if(!api){setStatus('#s4Status','PDF downloaded. Add the Apps Script link in Settings to send it to Drive.','good');return}
+    const du=doc.output('datauristring');const b64=du.slice(du.indexOf(',')+1);const ts=Date.now();
+    await obPut({id:'pdf_'+J.id,ts,params:{action:'upload',folder:J.offer||'CornerCheck',name,mime:'application/pdf',data:b64}});
+    await obPut({id:'log_'+J.id,ts:ts+1,params:reportParams()});
+    setStatus('#s4Status','PDF downloaded. Sending to Drive and Sheet…');
+    const r=await flushOutbox();
+    if(!r.left)setStatus('#s4Status','✓ PDF downloaded, uploaded to Drive and logged in the Sheet.','good');
+    else setStatus('#s4Status',`PDF downloaded. ${r.left} item(s) kept on the phone and will send when back online${r.err?' ('+esc(r.err)+')':''}.`,'err');
+  }catch(e){setStatus('#s4Status','Could not make the PDF: '+esc(e.message),'err')}
+  finally{btn.disabled=false}
+};
+$('#btnShare').onclick=async()=>{const s=jobStats(J),{list}=problems();const pend=s.t-s.done;
+  let t=`*Corner joint check — ${J.offer||''}*\n${J.customer||''}${J.addr?'\n'+J.addr:''}\n${J.material==='alu'?'Aluminium':'uPVC'} · ${J.stage==='factory'?'Factory':'Site'} · by ${J.by||'-'}\n\n`;
+  t+=`Positions: ${s.pos}\nCorners OK: ${s.ok} / ${s.t}\nNot OK: ${s.bad}${pend?`\nNot checked: ${pend}`:''}\n`;
+  if(list.length)t+='\n*Not OK*\n'+list.map(x=>`• #${x.i+1} ${x.p.ref} — ${x.pt.label}, ${CNAME[x.k]}: ${(x.c.defects||[]).map(d=>defName(J.material,d)).join(', ')||'see photo'}${x.c.note?' ('+x.c.note+')':''}`).join('\n');
+  else if(!pend&&s.t)t+='\n✅ All corners OK';
+  try{if(navigator.share){await navigator.share({text:t});return}}catch(e){if(e.name==='AbortError')return}
+  try{await navigator.clipboard.writeText(t)}catch(e){}window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank')};
+
+/* ---------- settings ---------- */
+async function openSettings(){$('#fApi').value=apiLink();const n=(await obAll()).length;$('#obInfo').textContent=n?`${n} item(s) waiting to upload.`:'Nothing waiting.';$('#settings').classList.add('on')}
+$('#btnSettings').onclick=openSettings;$('#setClose').onclick=()=>$('#settings').classList.remove('on');
+$('#setSave').onclick=()=>{const v=$('#fApi').value.trim();if(v)localStorage.setItem('lingel_api',v);$('#settings').classList.remove('on');toast('Saved')};
+$('#btnFlush').onclick=async()=>{const r=await flushOutbox();toast(r.left?`${r.left} still waiting${r.err?' — '+r.err:''}`:`Sent ${r.sent}`);openSettings()};
+window.addEventListener('online',()=>flushOutbox().then(r=>{if(r.sent)toast(`Uploaded ${r.sent} waiting item(s)`)}));
+
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#cam').classList.contains('on'))closeCam();else if($('#zoom').classList.contains('on'))$('#zoom').classList.remove('on');else if($('#sheet').classList.contains('on'))closeSheet()});
+
+openDB().then(()=>{show('jobs');flushOutbox()}).catch(()=>{document.body.innerHTML='<div class="wrap"><div class="panel">This browser blocks on-phone storage (private mode?). Open the app in a normal Chrome tab.</div></div>'});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+})();
+</script>
+</body>
+</html>
