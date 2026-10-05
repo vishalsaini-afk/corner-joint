@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#13161b">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Corner Check · Lingel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#13161b;--panel:#1b1f26;--panel2:#232832;--line:#2e3440;--text:#eceef1;--muted:#8d96a3;
+  --hv:#ffce1f;--ok:#35c98a;--bad:#ff5252;--todo:#4a5260;--prog:#6aa7ff;
+  --sans:'Archivo',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-tap-highlight-color:transparent}
+body{padding-bottom:env(safe-area-inset-bottom,0px);min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.4;cursor:default}
+:focus-visible{outline:2px solid var(--hv);outline-offset:2px}
+[hidden]{display:none!important}
+.wrap{max-width:760px;margin:0 auto;padding:14px 16px}
+header.top{position:sticky;top:0;z-index:30;background:rgba(19,22,27,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.hrow{display:flex;align-items:center;gap:10px;padding:10px 16px}
+.brand{font-weight:800;letter-spacing:.14em;font-size:13px;color:var(--hv)}
+.ttl{font-weight:700;font-size:17px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ib{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:14px;text-decoration:none;color:var(--text);display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.ib:active{transform:scale(.97)}
+.btn{border:0;border-radius:12px;padding:14px 18px;font-weight:700;font-size:16px;background:var(--hv);color:#15171b;width:100%;display:block;text-align:center}
+.btn.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+.btn.okb{background:rgba(53,201,138,.15);color:var(--ok);border:1px solid rgba(53,201,138,.5)}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.mono{font-family:var(--mono)}
+h2{font-size:16px;font-weight:700;margin:0 0 10px}
+p.lead{margin:0 0 14px;color:var(--muted);font-size:14px;line-height:1.45}
+label.f{display:block;font-size:13px;color:var(--muted);margin-bottom:10px}
+label.f input,textarea.in{display:block;width:100%;margin-top:4px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-size:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.seg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px;margin-top:4px}
+.seg button{flex:1;border:0;background:transparent;padding:9px 6px;border-radius:8px;font-weight:600;color:var(--muted)}
+.seg button.on{background:var(--panel2);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px}
+.kv span{color:var(--muted)}
+.toggles{display:grid;grid-template-columns:1fr;gap:8px}
+.toggles button{border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:14px 12px;font-size:15px;text-align:left;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:8px}
+.toggles button i{width:18px;height:18px;border-radius:5px;border:2px solid var(--muted);flex:none;display:grid;place-items:center;font-style:normal;font-size:12px}
+.toggles button.on{color:var(--text);border-color:var(--hv)}
+.toggles button.on i{background:var(--hv);border-color:var(--hv);color:#15171b}
+
+/* steps */
+.steps{display:flex;gap:4px;padding:0 12px 10px;overflow-x:auto}
+.steps button{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 6px;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
+.steps button i{font-style:normal;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--panel2);font-family:var(--mono);font-size:11.5px;flex:none}
+.steps button.on{border-color:var(--hv);color:var(--text)}
+.steps button.on i{background:var(--hv);color:#15171b}
+.steps button.done i{background:var(--ok);color:#06140d}
+@media (max-width:440px){.steps button span{display:none}.steps button.on span{display:inline}}
+
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12.5px;font-weight:700;white-space:nowrap}
+.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.v-ok{color:var(--ok);background:rgba(53,201,138,.12)}
+.v-fail{color:var(--bad);background:rgba(255,82,82,.13)}
+.v-prog{color:var(--prog);background:rgba(106,167,255,.12)}
+.v-todo,.v-skip{color:var(--muted);background:rgba(141,150,163,.12)}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+
+.drop{display:flex;flex-direction:column;align-items:center;gap:8px;border:2px dashed #4a5260;border-radius:16px;padding:28px 16px;background:var(--panel);text-align:center;width:100%}
+.drop b{font-size:17px}
+.drop span{color:var(--muted);font-size:13.5px}
+.job{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);margin-bottom:8px;width:100%;text-align:left}
+.job .m{flex:1;min-width:0}
+.job .m b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.job .m span{font-size:12.5px;color:var(--muted)}
+.empty{text-align:center;padding:22px 10px;color:var(--muted);font-size:14px}
+.status{font-size:14px;padding:10px 12px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);margin-top:10px}
+.status.err{border-color:rgba(255,82,82,.5);color:#ffb3b3}
+.status.good{border-color:rgba(53,201,138,.5);color:#9ff0c9}
+.big3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.big3 div{background:var(--panel2);border-radius:10px;padding:10px;text-align:center}
+.big3 b{display:block;font-family:var(--mono);font-size:22px}
+.big3 span{font-size:12px;color:var(--muted)}
+
+/* position cards */
+.pc{display:flex;gap:12px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--panel);margin-bottom:8px;width:100%;text-align:left}
+.pc.skip{opacity:.5}
+.pc .dr{width:60px;height:60px;border-radius:8px;background:#fff center/contain no-repeat;flex:none}
+.pc .dr.none{background:var(--panel2);display:grid;place-items:center;color:var(--muted);font-size:12px}
+.pc .m{flex:1;min-width:0}
+.pc .m b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc .m span{font-size:12.5px;color:var(--muted)}
+.chiprow{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.chip{font-size:12px;border:1px solid var(--line);background:var(--panel2);border-radius:999px;padding:3px 9px;color:var(--text)}
+.chip.off{opacity:.4;text-decoration:line-through}
+.cnts{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;align-items:center}
+.cnt{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted)}
+.cnt button{width:38px;height:38px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);font-size:16px;line-height:1}
+.cnt b{min-width:18px;text-align:center;font-size:15px;color:var(--text);font-family:var(--mono)}
+.skipb{margin-left:auto;font-size:12.5px;padding:6px 10px}
+.skipb.on{border-color:var(--hv);color:var(--hv)}
+.minis{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.mini{display:grid;grid-template-columns:repeat(2,8px);gap:2px}
+.mini i{width:8px;height:8px;border-radius:2px;background:var(--todo)}
+.prog{height:8px;border-radius:4px;background:var(--panel2);overflow:hidden;display:flex;margin:8px 0}
+.prog i{display:block;height:100%}
+
+/* position screen — parts as little windows */
+.posTop{display:flex;gap:14px;align-items:flex-start;margin-bottom:12px}
+.posTop img{width:42%;max-width:220px;background:#fff;border-radius:10px;padding:4px}
+.posTop b{font-size:19px;display:block}
+.parts{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px;margin:12px 0}
+.part{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.part.ok{border-color:rgba(53,201,138,.6)}.part.fail{border-color:rgba(255,82,82,.7)}
+.part .h b{display:block;font-size:15px}
+.part .h span{font-size:11.5px;color:var(--muted);font-family:var(--mono)}
+.pbox{position:relative;width:100%;max-height:210px;margin:0 auto;border:9px solid #3b424e;border-radius:3px;
+  background:linear-gradient(135deg,rgba(130,180,220,.13),rgba(130,180,220,.03) 55%,rgba(255,255,255,.07))}
+.pbox.M{background:repeating-linear-gradient(45deg,rgba(255,255,255,.05) 0 3px,transparent 3px 7px)}
+.pbox .ov{position:absolute;inset:0;background:center/cover no-repeat;opacity:.55}
+.ck{position:absolute;width:42px;height:42px;border-radius:9px;border:2px solid var(--todo);background:#1f242d center/cover no-repeat;font-weight:800;font-size:18px;color:#fff;display:grid;place-items:center;padding:0}
+.ck.TL{top:-9px;left:-9px}.ck.TR{top:-9px;right:-9px}.ck.BL{bottom:-9px;left:-9px}.ck.BR{bottom:-9px;right:-9px}
+.ck.ok{border-color:var(--ok);background-color:#163a2b;color:var(--ok)}
+.ck.fail{border-color:var(--bad);background-color:#4a1d1d;color:#ff9b9b}
+.ck.prog{border-color:var(--prog)}
+.part .acts{display:flex;gap:6px}
+.part .acts button{flex:1;padding:11px 6px;font-size:14px}
+.posbar .btn{padding:14px 10px}
+.posbar .nav{flex:0 0 56px;font-size:20px}
+@media (max-width:420px){.wrap{padding:12px}.posTop img{width:38%}.posTop b{font-size:17px}.part{padding:8px}.pbox{max-height:180px}
+  .ck{width:40px;height:40px}.cnts{gap:10px}.pc .dr{width:54px;height:54px}.stat b{font-size:19px}.big3 b{font-size:19px}}
+.bar{position:sticky;bottom:0;background:rgba(19,22,27,.97);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:center;z-index:25}
+
+/* sheets */
+.sheet{position:fixed;inset:0;z-index:50;background:var(--bg);display:none;flex-direction:column}
+.sheet.on{display:flex}
+.sheet .body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.ph{position:relative;background:#0d0f12;border:1px solid var(--line);border-radius:14px;overflow:hidden;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center}
+.ph img{width:100%;height:100%;object-fit:contain}
+.ph .none{text-align:center;color:var(--muted);font-size:14px;padding:20px}
+.warn{background:rgba(255,157,46,.1);border:1px solid rgba(255,157,46,.4);color:#ffc98e;border-radius:10px;padding:9px 12px;font-size:13.5px;margin-top:10px}
+.ai{background:rgba(106,167,255,.08);border:1px solid rgba(106,167,255,.35);border-radius:10px;padding:10px 12px;font-size:14px;margin-top:10px}
+.ai b{color:var(--prog)}
+.verdict{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 4px}
+.verdict button{border:2px solid var(--line);background:var(--panel2);border-radius:14px;padding:16px 8px;font-weight:800;font-size:18px;color:var(--muted)}
+.verdict button.on[data-v=ok]{border-color:var(--ok);color:var(--ok);background:rgba(53,201,138,.14)}
+.verdict button.on[data-v=bad]{border-color:var(--bad);color:var(--bad);background:rgba(255,82,82,.14)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chips button{border:1px solid var(--line);background:var(--panel2);border-radius:999px;padding:9px 13px;font-size:14px;font-weight:600;color:var(--muted)}
+.chips button.on{border-color:var(--bad);color:#ffc0c0;background:rgba(255,82,82,.14)}
+
+#cam{background:#000}
+#cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#cam .guide{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#cam .hint{position:absolute;left:16px;right:16px;top:calc(14px + env(safe-area-inset-top,0px));text-align:center;background:rgba(0,0,0,.55);border-radius:10px;padding:10px;font-size:14px}
+#cam .ctl{position:absolute;left:0;right:0;bottom:0;padding:18px 20px calc(22px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:space-between;background:linear-gradient(transparent,rgba(0,0,0,.7))}
+.shutter{width:76px;height:76px;border-radius:50%;border:5px solid #fff;background:var(--hv)}
+.shutter:active{transform:scale(.93)}
+#zoom{background:#000}
+#zoom img{display:block;width:100%}
+#zoom.z2 img{width:250%}
+
+.stat{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.stat div{background:var(--panel2);border-radius:10px;padding:10px 6px;text-align:center}
+.stat b{display:block;font-size:22px;font-family:var(--mono)}
+.stat span{font-size:12px;color:var(--muted)}
+.hbar{margin-bottom:10px}
+.hbar .t{display:flex;justify-content:space-between;font-size:13.5px;gap:8px}
+.hbar .b{height:8px;border-radius:4px;background:var(--panel2);margin-top:4px;overflow:hidden}
+.hbar .b i{display:block;height:100%;border-radius:4px;background:var(--bad)}
+.nok{display:flex;gap:10px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);margin-bottom:6px;width:100%;text-align:left}
+.nok img,.nok .noimg{width:52px;height:52px;border-radius:6px;object-fit:cover;flex:none;background:#000}
+.nok .m{flex:1;min-width:0;font-size:13.5px}
+.nok .m b{display:block}
+.allok{border:2px solid var(--ok);color:var(--ok);border-radius:14px;padding:14px;text-align:center;font-weight:800;font-size:18px;margin-bottom:14px}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:#2b313b;border:1px solid var(--line);padding:10px 16px;border-radius:10px;font-size:14px;z-index:90;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;text-align:center}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="hrow">
+    <a class="ib" href="index.html" aria-label="Back to Field Tools">⌂</a>
+    <span class="brand">LINGEL</span>
+    <span class="ttl" id="hdrTitle">Corner Check</span>
+    <button class="ib" id="btnJobs" hidden>Jobs</button>
+    <button class="ib" id="btnSettings" aria-label="Settings">⚙</button>
+  </div>
+  <nav class="steps" id="steps" hidden>
+    <button data-s="1"><i>1</i><span>Sheet</span></button>
+    <button data-s="2"><i>2</i><span>Parts</span></button>
+    <button data-s="3"><i>3</i><span>Check</span></button>
+    <button data-s="4"><i>4</i><span>Report</span></button>
+  </nav>
+</header>
+
+<!-- JOBS -->
+<section id="vJobs"><div class="wrap">
+  <h2 style="font-size:26px;margin:6px 0 4px">Corner Check</h2>
+  <p class="lead">Upload the production sheet. Every frame, glass sash and mesh sash is read from it, so you only check corners and photograph the bad ones.</p>
+  <button class="drop" id="btnUpload">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ffce1f" stroke-width="1.6"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/><path d="M12 17v-6M9 13.5l3-3 3 3"/></svg>
+    <b>Upload production sheet PDF</b><span>Positions, parts, sizes and drawings are read automatically</span>
+  </button>
+  <input type="file" id="fileSheet" accept="application/pdf" hidden>
+  <button type="button" class="drop" id="btnOffer" style="margin-top:10px;padding:14px" onclick="ccLoadByOffer()"><b>🔎 Load by Offer No</b><span>Use a production sheet already uploaded in QR Quality or any other app</span></button>
+  <div id="jobStatus"></div>
+  <h2 style="margin-top:22px">Saved checks</h2>
+  <div id="jobList"></div>
+</div></section>
+
+<!-- STEP 1 -->
+<section id="vS1" hidden><div class="wrap">
+  <div class="panel">
+    <h2>Order</h2>
+    <div class="kv" id="orderKv"></div>
+    <div class="big3" id="orderBig"></div>
+  </div>
+  <div class="panel">
+    <h2>Check these parts</h2>
+    <div class="toggles" id="incToggles"></div>
+    <p class="small muted" style="margin:10px 0 0">Untick a part type to leave it out for the whole order.</p>
+  </div>
+  <div class="panel">
+    <label class="f">Checked at<div class="seg" id="segStage"><button type="button" data-v="factory">Factory</button><button type="button" data-v="dispatch">Dispatch</button><button type="button" data-v="site">Site</button></div></label>
+    <label class="f">Checked by<input id="fBy" autocomplete="off" placeholder="Your name"></label>
+  </div>
+  <button class="btn" data-go="2">Next: review parts</button>
+  <div style="height:30px"></div>
+</div></section>
+
+<!-- STEP 2 -->
+<section id="vS2" hidden><div class="wrap">
+  <p class="lead">These parts were read from the sheet. Correct a count only if the sheet was wrong, or skip a position you are not checking.</p>
+  <div id="s2List"></div>
+  <button class="btn" data-go="3">Next: check corners</button>
+  <div style="height:30px"></div>
+</div></section>
+
+<!-- STEP 3 -->
+<section id="vS3" hidden><div class="wrap">
+  <div class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><h2 style="margin:0">Corners checked</h2><span class="mono" id="s3Count"></span></div>
+    <div class="prog" id="s3Bar"></div>
+    <div class="small muted">Open a window. Tap <b>All 4 OK</b> on good parts. Tap a corner only when something is wrong.</div>
+  </div>
+  <div id="s3List"></div>
+  <button class="btn" data-go="4" style="margin-top:6px">Next: report</button>
+  <div style="height:30px"></div>
+</div></section>
+
+<!-- POSITION -->
+<section id="vPos" hidden><div class="wrap">
+  <button class="ib" id="btnPosBack" style="margin-bottom:12px">‹ All windows</button>
+  <div class="posTop"><img id="posImg" alt="Position drawing" hidden><div style="min-width:0">
+    <b id="posRef"></b><div class="small muted" id="posInfo" style="margin-top:4px;line-height:1.5"></div><div id="posPill" style="margin-top:8px"></div></div></div>
+  <p class="small muted" style="margin:0 0 4px">Tap <b>All 4 OK</b> on good parts. Tap a corner only if it is wrong.</p>
+  <div class="parts" id="parts"></div>
+  <div style="height:24px"></div>
+</div>
+<div class="bar posbar">
+  <button class="btn ghost nav" id="btnPrevPos" aria-label="Previous window">‹</button>
+  <button class="btn okb" id="btnWinOk">✓ Rest OK</button>
+  <button class="btn ghost nav" id="btnNextPos" aria-label="Next window">›</button>
+</div></section>
+
+<!-- STEP 4 -->
+<section id="vS4" hidden><div class="wrap">
+  <div class="panel"><h2>Summary</h2><div class="stat" id="s4Stat"></div><div class="prog" id="s4Bar"></div></div>
+  <div id="s4AllOk"></div>
+  <div class="panel" id="pDef"><h2>Problems found</h2><div id="s4Def"></div></div>
+  <div class="panel" id="pType"><h2>Not OK by part type</h2><div id="s4Type"></div></div>
+  <div class="panel" id="pSeries"><h2>Not OK by series</h2><div id="s4Series"></div></div>
+  <div class="panel" id="pNok"><h2>Corners not OK</h2><div id="s4Nok"></div></div>
+  <button class="btn" id="btnPDF">PDF report</button>
+  <p class="small muted" style="margin:8px 2px 12px">Downloads the PDF, uploads it to the order's Drive folder and logs the check in the Sheet. Without internet it waits on the phone and sends itself later.</p>
+  <button class="btn ghost" id="btnShare">Share summary on WhatsApp</button>
+  <div id="s4Status"></div>
+  <div style="height:30px"></div>
+</div></section>
+
+<!-- CORNER SHEET -->
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle">
+  <header class="top"><div class="hrow">
+    <button class="ib" id="btnShClose" aria-label="Close">✕</button>
+    <span class="ttl" id="shTitle"></span>
+    <span class="pill v-todo" id="shVerdict"></span>
+  </div></header>
+  <div class="body"><div class="wrap">
+    <div class="ph" id="ph"></div>
+    <div id="qwarn"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn" id="btnCam">Take photo</button>
+      <button class="btn ghost" id="btnGal">From gallery</button>
+    </div>
+    <input type="file" id="fileCam" accept="image/*" capture="environment" hidden>
+    <input type="file" id="fileGal" accept="image/*" hidden>
+    <div class="verdict" id="verdict"><button type="button" data-v="ok">OK</button><button type="button" data-v="bad">Not OK</button></div>
+    <div id="defBox" hidden>
+      <div class="small muted" style="margin-top:8px">What is wrong? Tap all that apply.</div>
+      <div class="chips" id="defChips"></div>
+      <label class="f">Note<textarea class="in" id="fNote" rows="2" placeholder="e.g. 1 mm step on inner face, sent for re-crimp"></textarea></label>
+    </div>
+    <button class="btn ghost" id="btnAI" style="margin-top:8px">Check photo with AI</button>
+    <div id="aiBox"></div>
+    <div style="height:90px"></div>
+  </div></div>
+  <div class="bar">
+    <button class="btn ghost" id="btnPrevC" style="width:auto">‹</button>
+    <button class="btn" id="btnNextC">Next corner ›</button>
+  </div>
+</div>
+
+<!-- CAMERA -->
+<div class="sheet" id="cam" role="dialog" aria-modal="true" aria-label="Camera">
+  <video id="vid" playsinline muted></video>
+  <svg class="guide" id="guideSvg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <g id="guideG">
+      <rect x="38" y="38" width="58" height="13" fill="rgba(255,206,31,.13)" stroke="#ffce1f" stroke-width=".5" stroke-dasharray="2 1.5"/>
+      <rect x="38" y="38" width="13" height="58" fill="rgba(255,206,31,.13)" stroke="#ffce1f" stroke-width=".5" stroke-dasharray="2 1.5"/>
+      <path d="M38 38 L51 51" stroke="#ffce1f" stroke-width=".9"/>
+    </g>
+  </svg>
+  <div class="hint" id="camHint"></div>
+  <div class="ctl">
+    <button class="ib" id="camCancel">Cancel</button>
+    <button class="shutter" id="camSnap" aria-label="Take photo"></button>
+    <button class="ib" id="camFile">Gallery</button>
+  </div>
+</div>
+
+<div class="sheet" id="zoom" role="dialog" aria-modal="true" aria-label="Photo">
+  <header class="top"><div class="hrow"><span class="ttl">Tap photo to zoom</span><button class="ib" id="zoomClose">Close</button></div></header>
+  <div class="body"><img id="zoomImg" alt="Photo"></div>
+</div>
+
+<div class="sheet" id="settings" role="dialog" aria-modal="true" aria-labelledby="setT">
+  <header class="top"><div class="hrow"><span class="ttl" id="setT">Settings</span><button class="ib" id="setClose">Close</button></div></header>
+  <div class="body"><div class="wrap">
+    <div class="panel">
+      <h2>Apps Script link</h2>
+      <p class="muted small" style="margin-top:0">The same /exec link the Field Tools hub uses. It uploads the PDF to Drive, logs the Sheet, and runs the optional AI photo check.</p>
+      <label class="f">Link<input id="fApi" placeholder="https://script.google.com/macros/s/…/exec"></label>
+      <button class="btn" id="setSave">Save</button>
+    </div>
+    <div class="panel"><h2>Waiting to send</h2><div id="obInfo" class="small muted"></div>
+      <button class="btn ghost" id="btnFlush" style="margin-top:10px">Send now</button></div>
+  </div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+const PDFJS_W='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const JSPDF='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+
+/* ---------- problems per corner ---------- */
+const DEF={
+  alu:[['gap','Open gap','A slit or light is visible along the 45° cut'],['step','Not flush','One profile edge stands higher than the other'],
+       ['crimp','Crimp marks / loose','Crimp dents on the face, or the joint moves'],['seal','Not sealed','Corner glue or sealant missing'],
+       ['mitre',"Cuts don't meet",'The two 45° cut lines are out of line'],['smear','Glue smears','Excess glue or sealant left on the face'],
+       ['finish','Scratch / dent','Powder coat chipped, scratched or dented'],['shade','Shade mismatch','Colour differs between the two profiles'],['other','Other','']],
+  upvc:[['crack','Crack at weld','Hairline crack or white stress mark on the seam'],['step','Not flush','One profile edge stands higher than the other'],
+       ['weld','Weld not cleaned','Weld bead left on the face or in grooves'],['line','Weld line crooked','Seam not straight or off-centre'],
+       ['burn','Burn mark','Yellow or brown marks from welding heat'],['foil','Foil lifting','Lamination lifting, torn or white at the seam'],
+       ['finish','Scratch / dent','Surface scratched or dented near the joint'],['other','Other','']]
+};
+const defName=(mat,c)=>((DEF[mat]||DEF.alu).find(d=>d[0]===c)||[c,c])[1];
+const CORNERS=[['TL','Top left'],['TR','Top right'],['BR','Bottom right'],['BL','Bottom left']];
+const CNAME=Object.fromEntries(CORNERS);
+const ROT={TL:0,TR:90,BR:180,BL:270};
+const PTYPE={F:'Frame',S:'Glass sash',M:'Mesh sash'};
+const VL={ok:'OK',fail:'Not OK',prog:'In progress',todo:'Not checked',skip:'Skipped'};
+const VC={ok:'var(--ok)',fail:'var(--bad)',prog:'var(--prog)',todo:'var(--todo)',skip:'var(--todo)'};
+
+/* ---------- storage ---------- */
+let db;
+const openDB=()=>new Promise((res,rej)=>{const r=indexedDB.open('lingel_corner_ps',1);
+  r.onupgradeneeded=()=>{const d=r.result;
+    if(!d.objectStoreNames.contains('jobs'))d.createObjectStore('jobs',{keyPath:'id'});
+    if(!d.objectStoreNames.contains('outbox'))d.createObjectStore('outbox',{keyPath:'id'})};
+  r.onsuccess=()=>{db=r.result;res()};r.onerror=()=>rej(r.error)});
+const idb=(st,mode,fn)=>new Promise(r=>{try{const q=fn(db.transaction(st,mode).objectStore(st));q.onsuccess=()=>r(q.result);q.onerror=()=>r(null)}catch(e){r(null)}});
+const jobsAll=()=>idb('jobs','readonly',s=>s.getAll()).then(x=>x||[]);
+const jobPut=o=>idb('jobs','readwrite',s=>s.put(o));
+const jobDel=id=>idb('jobs','readwrite',s=>s.delete(id));
+
+let J=null,curPos=null,curPart=null,curCorner='TL',view='jobs',camTarget='corner';
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2800)};
+const supervisor=()=>{try{return JSON.parse(localStorage.getItem('lingel_supervisor')||'{}').name||''}catch(e){return''}};
+const apiLink=()=>{try{return localStorage.getItem('lingel_api')||''}catch(e){return''}};
+const slug=s=>String(s||'').replace(/[\/\\]+/g,'-').replace(/[^\w\-]+/g,'_').replace(/_+/g,'_').slice(0,60)||'NoOrder';
+const mm=n=>n?Math.round(n):'';
+function setStatus(el,msg,kind){$(el).innerHTML=msg?`<div class="status ${kind||''}">${msg}</div>`:''}
+function loadScript(src){return new Promise((res,rej)=>{if(src===JSPDF&&window.jspdf)return res();if(src===PDFJS&&window.pdfjsLib)return res();
+  const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('could not load '+src.split('/').pop()+' — check internet'));document.head.appendChild(s)})}
+let saveT;function save(){if(!J)return;J.updated=Date.now();clearTimeout(saveT);saveT=setTimeout(()=>jobPut(J),250)}
+
+/* ---------- parts & verdicts ---------- */
+function partsOf(p,j=J){if(p.skip)return[];const inc=j.include,out=[];
+  if(inc.F&&p.frame)out.push({id:'F',type:'F',label:p.fixed?'Frame (fixed)':'Frame',art:p.frame.art,w:p.frame.w,h:p.frame.h});
+  if(inc.S)for(let i=0;i<p.nS;i++){const s=p.sashes[i]||{};out.push({id:'S'+(i+1),type:'S',label:'Sash '+(s.nr||i+1),art:s.art||'',w:s.w||0,h:s.h||0})}
+  if(inc.M)for(let i=0;i<p.nM;i++)out.push({id:'M'+(i+1),type:'M',label:'Mesh sash'+(p.nM>1?' '+(i+1):''),art:p.mArt||'',w:p.mW||0,h:p.mH||0});
+  return out}
+const cornerV=c=>!c?'todo':c.v==='bad'?'fail':c.v==='ok'?'ok':(c.photo?'prog':'todo');
+function posStats(p,j=J){const s={t:0,ok:0,bad:0,prog:0};partsOf(p,j).forEach(pt=>CORNERS.forEach(([k])=>{s.t++;const v=cornerV(p.corners[pt.id+'|'+k]);if(v==='ok')s.ok++;else if(v==='fail')s.bad++;else if(v==='prog')s.prog++}));s.done=s.ok+s.bad;return s}
+function posV(p,j=J){if(p.skip||!partsOf(p,j).length)return'skip';const s=posStats(p,j);if(s.bad)return'fail';if(s.done===s.t)return'ok';return(s.done||s.prog)?'prog':'todo'}
+function partV(p,pid){const vs=CORNERS.map(([k])=>cornerV(p.corners[pid+'|'+k]));if(vs.includes('fail'))return'fail';if(vs.every(v=>v==='ok'))return'ok';return vs.some(v=>v!=='todo')?'prog':'todo'}
+function jobStats(j){const s={t:0,ok:0,bad:0,prog:0,done:0,pos:0,parts:0};j.positions.forEach(p=>{const pts=partsOf(p,j);if(!pts.length)return;s.pos++;s.parts+=pts.length;const x=posStats(p,j);s.t+=x.t;s.ok+=x.ok;s.bad+=x.bad;s.prog+=x.prog;s.done+=x.done});return s}
+function jobV(j){const s=jobStats(j);if(!s.t)return'todo';if(s.bad)return'fail';if(s.done===s.t)return'ok';return s.done?'prog':'todo'}
+const pill=v=>`<span class="pill v-${v}">${VL[v]}</span>`;
+const progBar=s=>s.t?`<i style="width:${s.ok/s.t*100}%;background:var(--ok)"></i><i style="width:${s.bad/s.t*100}%;background:var(--bad)"></i>`:'';
+
+/* ---------- navigation ---------- */
+function show(v){view=v;
+  ['Jobs','S1','S2','S3','Pos','S4'].forEach(x=>$('#v'+x).hidden=x!==v);
+  const inJob=v!=='Jobs';$('#steps').hidden=!inJob;$('#btnJobs').hidden=!inJob;
+  $('#hdrTitle').textContent=inJob?(J.offer||'Corner Check'):'Corner Check';
+  const st=v==='Pos'?3:+String(v).replace('S','')||0;
+  $$('#steps button').forEach(b=>b.classList.toggle('on',+b.dataset.s===st));
+  if(inJob){const s=jobStats(J);
+    $('#steps [data-s="1"]').classList.toggle('done',st>1);$('#steps [data-s="2"]').classList.toggle('done',st>2);
+    $('#steps [data-s="3"]').classList.toggle('done',s.t>0&&s.done===s.t&&st!==3);J.step=st;save()}
+  window.scrollTo(0,0);
+  ({Jobs:renderJobs,S1:renderS1,S2:renderS2,S3:renderS3,Pos:renderPos,S4:renderS4})[v]();
+}
+$('#steps').addEventListener('click',e=>{const b=e.target.closest('button');if(b)show('S'+b.dataset.s)});
+$$('[data-go]').forEach(b=>b.onclick=()=>show('S'+b.dataset.go));
+$('#btnJobs').onclick=()=>{J=null;show('Jobs')};
+
+/* ---------- JOBS ---------- */
+async function renderJobs(){
+  const all=(await jobsAll()).sort((a,b)=>b.updated-a.updated);
+  if(!all.length){$('#jobList').innerHTML='<div class="empty">Nothing checked yet. Upload a production sheet to start.</div>';return}
+  $('#jobList').innerHTML=all.map(j=>{const s=jobStats(j),v=jobV(j);
+    return `<button class="job" data-id="${j.id}"><div class="m"><b>${esc(j.offer||'—')} · ${esc(j.customer||'—')}</b>
+    <span>${s.pos} windows · ${s.done}/${s.t} corners${s.bad?` · <b style="color:var(--bad);display:inline">${s.bad} not OK</b>`:''} · ${new Date(j.updated).toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</span>
+    <div class="prog" style="margin:6px 0 0">${progBar(s)}</div></div>${pill(v)}</button>`}).join('');
+  $('#jobList').querySelectorAll('.job').forEach(b=>b.onclick=()=>{J=all.find(j=>j.id===b.dataset.id);curPos=null;show('S'+Math.min(4,Math.max(1,J.step||1)))});
+}
+$('#btnUpload').onclick=()=>$('#fileSheet').click();
+$('#fileSheet').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;await ccImport(f,false)};
+async function ccImport(f,fromLib){
+  try{setStatus('#jobStatus','Reading production sheet…');
+    const r=await parseSheet(f,m=>setStatus('#jobStatus',m));
+    if(!r.positions.length){setStatus('#jobStatus','No "Order-Pos." found in this PDF. Is it a Lingel production sheet?','err');return}
+    const existing=(await jobsAll()).find(j=>j.offer&&j.offer===r.offer);
+    if(existing&&!confirm(`Order ${r.offer} already has a saved check. Start a new one? (The old one stays in the list.)`)){J=existing;show('S1');return}
+    J={id:'cp'+Date.now()+Math.random().toString(36).slice(2,6),created:Date.now(),updated:Date.now(),sheetName:f.name,
+      offer:r.offer,customer:r.customer,admin:r.admin,sales:r.sales,color:r.color,material:r.material,
+      stage:'factory',by:supervisor(),include:{F:true,S:true,M:true},positions:r.positions,step:1};
+    save();setStatus('#jobStatus','');show('S1');
+    if(!fromLib&&r.offer)LD.saveQuiet(f,{offer:r.offer,kind:'production',customer:r.customer||'',salesperson:r.sales||'',positions:String(r.positions.length),sqft:r.positions.reduce((a,p)=>a+(p.sqft||((p.frame&&p.frame.w)?p.frame.w*p.frame.h*(p.qty||1)/92903.04:0)),0).toFixed(2),app:'Corner Check'});
+    r.drawings.then(()=>{save();if(view==='S2'||view==='S3')show(view);toast('Drawings loaded')}).catch(()=>{});
+  }catch(err){setStatus('#jobStatus','Could not read the sheet: '+esc(err.message),'err')}
+}
+window.ccLoadByOffer=function(){
+  LD.openLoader(async function(file, kind, meta){
+    if (kind !== 'production'){ setStatus('#jobStatus','Only a quotation is saved for '+esc(meta.offer)+'. Corner Check needs the production sheet: upload it once here or in QR Quality.','err'); return; }
+    await ccImport(file, true);
+  }, '', 'production');
+};
+
+/* ---------- production sheet parser ---------- */
+const NUM=/^\d{2,5}[,.]\d{1,2}$/;
+const num=s=>parseFloat(String(s).replace(',','.'));
+async function parseSheet(file,progress){
+  await loadScript(PDFJS);pdfjsLib.GlobalWorkerOptions.workerSrc=PDFJS_W;
+  const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+  const lines=[];
+  for(let pn=1;pn<=pdf.numPages;pn++){
+    progress&&progress(`Reading page ${pn} of ${pdf.numPages}…`);
+    const page=await pdf.getPage(pn);const vp=page.getViewport({scale:1});const tc=await page.getTextContent();
+    const toks=[];
+    tc.items.forEach(it=>{if(!it.str||!it.str.trim())return;const x=it.transform[4],y=vp.height-it.transform[5],cw=(it.width||0)/Math.max(1,it.str.length);
+      let idx=0;it.str.split(/(\s+)/).forEach(part=>{if(part.trim())toks.push({s:part,x:x+idx*cw,y,page:pn});idx+=part.length})});
+    toks.sort((a,b)=>a.y-b.y||a.x-b.x);
+    const rows=[];toks.forEach(t=>{const r=rows.find(r=>Math.abs(r.y-t.y)<2.5);r?r.toks.push(t):rows.push({y:t.y,toks:[t]})});
+    rows.sort((a,b)=>a.y-b.y).forEach(r=>{r.toks.sort((a,b)=>a.x-b.x);
+      lines.push({page:pn,y:r.y,toks:r.toks,text:r.toks.map(t=>t.s).join(' '),left:r.toks.filter(t=>t.x<300).map(t=>t.s).join(' ')})});
+  }
+  const full=lines.map(l=>l.text).join('\n');
+  const g=(re,s=full)=>{const m=s.match(re);return m?m[1].trim():''};
+  const out={offer:g(/Dokument-Nr\.?\s*:\s*(\S+)/),customer:g(/Customer:\s*(.+?)\s+Administrator:/),admin:g(/Administrator:\s*([^\n]+)/),
+    sales:g(/Sales by:\s*([^\n]+)/),color:'',material:/System\s*:\s*u?PVC/i.test(full)?'upvc':'alu',positions:[]};
+  const ops=lines.map((l,i)=>/Order-Pos\.?\s*:/.test(l.text)?i:-1).filter(i=>i>=0);
+  const blocks=[];
+  ops.forEach((oi,k)=>{
+    const end=k+1<ops.length?ops[k+1]:lines.length,bl=lines.slice(oi,end),L0=lines[oi];
+    const txt=bl.map(l=>l.text).join('\n');
+    let ref=g(/Order-Pos\.?\s*:\s*(.*?)\s*(?:Color:|Quantity:|$)/,L0.text),contY=L0.y;
+    const nx=lines[oi+1];
+    if(nx&&nx.page===L0.page&&nx.y-L0.y<14&&!nx.text.includes(':')&&nx.text.length<=24){ref+=' '+nx.text.trim();contY=nx.y}
+    if(!out.color)out.color=g(/Color:\s*(\S+)/,L0.text);
+    const p={id:'p'+Math.random().toString(36).slice(2,9),ref,qty:+g(/Quantity:\s*(\d+)/,L0.text)||1,
+      system:g(/System\s*:\s*(?:Aluminium\s*-\s*)?([^\n]+?)(?:\s{2,}|$)/m,txt),series:g(/Lingel\s*([\d.]+)/,txt),
+      frameType:g(/Frame\s*:\s*([^\n]+)/,txt),method:g(/Method\s*:\s*([A-Za-z ]+?)(?:,|\n|$)/,txt),connector:g(/Corner Connector\s*:\s*(\S+)/,txt),
+      frame:null,fixed:false,sashes:[],nS:0,nM:0,drawing:'',skip:false,corners:{},partPhotos:{}};
+    // profile table: rows are found by their B/H number pair, the article is whatever sits left of it (wrapped names joined)
+    const hi=bl.findIndex(l=>/^Nr\b/.test(l.text)&&l.text.includes('Artikel'));
+    if(hi>=0){const H=bl[hi],arts=H.toks.filter(t=>t.s==='Artikel');const nrMax=arts[0].x-3,colMax=arts[1]?arts[1].x-3:arts[0].x+150;
+      const tl=[];for(let i=hi+1;i<bl.length;i++){const l=bl[i];if(l.page!==H.page||/^(Connectors|Sliding|Shutter|Hardware|ISO|Production)/.test(l.text))break;tl.push(...l.toks.filter(t=>t.x<colMax))}
+      const nums=tl.filter(t=>NUM.test(t.s)),rows=[];
+      nums.forEach(t=>{const r=rows.find(r=>Math.abs(r.y-t.y)<2.5);r?r.n.push(t):rows.push({y:t.y,n:[t]})});
+      rows.sort((a,b)=>a.y-b.y);
+      rows.forEach((r,i)=>{if(r.n.length<2)return;r.n.sort((a,b)=>a.x-b.x);const ny=rows[i+1]?rows[i+1].y:1e9,lim=Math.min(ny-2.5,r.y+16);
+        const art=tl.filter(t=>/[A-Za-z]/.test(t.s)&&t.x<r.n[0].x-1&&t.y>=r.y-3&&t.y<lim).sort((a,b)=>a.y-b.y||a.x-b.x).map(t=>t.s).join('');
+        const nr=tl.find(t=>t.x<nrMax+6&&/^\d{1,2}$/.test(t.s)&&t.y>=r.y-3&&t.y<lim);
+        const o={art,w:num(r.n[0].s),h:num(r.n[1].s),nr:nr?+nr.s:0};
+        if(o.nr)p.sashes.push(o);else if(!p.frame)p.frame=o});
+      if(!p.frame&&p.sashes.length===1){p.frame=p.sashes[0];p.frame.nr=0;p.sashes=[];p.fixed=true}
+    }
+    if(!p.frame)p.frame={art:'',w:0,h:0};
+    p.nS=p.sashes.length;
+    // mesh parts from the cut list: 4 mitred (45/45) pieces = one rectangle
+    const cut=(name)=>{const re=new RegExp(name+'[^\\n]*?(\\d{2,5}[,.]\\d)\\s+45\\s+45\\s+([UOLR])\\b','g');let m,w=0,h=0,n=0;
+      while((m=re.exec(txt))){n++;if(/[UO]/.test(m[2]))w=w||num(m[1]);else h=h||num(m[1])}return{n,w,h}};
+    const ms=cut('Aluminium Sliding Sash');
+    p.nM=Math.ceil(ms.n/4);p.mW=ms.w;p.mH=ms.h;p.mArt=g(/(\S+?-FB-\S+)/,txt);
+    p.no=parseInt(ref,10)||k+1;
+    blocks.push({p,page:L0.page,y0:contY+6});
+    out.positions.push(p);
+  });
+  out.positions.sort((a,b)=>a.no-b.no);
+  out.drawings=extractDrawings(pdf,blocks);
+  return out;
+}
+async function extractDrawings(pdf,blocks){
+  const byPage={};blocks.forEach(b=>(byPage[b.page]=byPage[b.page]||[]).push(b));
+  for(const pg of Object.keys(byPage)){
+    const page=await pdf.getPage(+pg);const S=2,vp=page.getViewport({scale:S});
+    const cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;const ctx=cv.getContext('2d');
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);await page.render({canvasContext:ctx,viewport:vp}).promise;
+    byPage[pg].forEach(b=>{try{const x0=25,x1=188,y0=b.y0,y1=Math.min(vp.height/S,y0+330);if(y1-y0<30)return;
+      const c=document.createElement('canvas');c.width=(x1-x0)*S;c.height=Math.round((y1-y0)*S);const cx=c.getContext('2d');cx.drawImage(cv,x0*S,y0*S,c.width,c.height,0,0,c.width,c.height);
+      // the elevation ends at the first clear white band once ~100pt of drawing has been seen (section drawings follow below)
+      const d=cx.getImageData(0,0,c.width,c.height).data;let first=-1,blank=0,cut=c.height;
+      for(let y=0;y<c.height;y++){let ink=false;for(let x=0;x<c.width;x+=2){const i=(y*c.width+x)*4;if(d[i]+d[i+1]+d[i+2]<600){ink=true;break}}
+        if(ink){if(first<0)first=y;blank=0}else if(first>=0){blank++;if(y-first>100*S&&blank>=7*S){cut=y-blank+1;break}}}
+      const o=document.createElement('canvas');o.width=c.width;o.height=cut;o.getContext('2d').drawImage(c,0,0);
+      const t=trimWhite(o);if(t)b.p.drawing=t}catch(e){}});
+  }
+}
+function trimWhite(c){const x=c.getContext('2d'),d=x.getImageData(0,0,c.width,c.height).data;let a=c.width,b=c.height,r=-1,s=-1;
+  for(let y=0;y<c.height;y++)for(let X=0;X<c.width;X++){const i=(y*c.width+X)*4;if(d[i]+d[i+1]+d[i+2]<690){if(X<a)a=X;if(X>r)r=X;if(y<b)b=y;if(y>s)s=y}}
+  if(r<0)return'';const P=6;a=Math.max(0,a-P);b=Math.max(0,b-P);r=Math.min(c.width,r+P);s=Math.min(c.height,s+P);
+  const w=r-a,h=s-b,k=Math.min(1,560/Math.max(w,h));const o=document.createElement('canvas');o.width=Math.round(w*k);o.height=Math.round(h*k);
+  const ox=o.getContext('2d');ox.fillStyle='#fff';ox.fillRect(0,0,o.width,o.height);ox.drawImage(c,a,b,w,h,0,0,o.width,o.height);return o.toDataURL('image/jpeg',.82)}
+
+/* ---------- STEP 1 ---------- */
+function renderS1(){
+  const kv=[['Order',J.offer],['Customer',J.customer],['Administrator',J.admin],['Sales by',J.sales],['Colour',(J.color||'').replace(/_/g,' ')],['Sheet',J.sheetName]];
+  $('#orderKv').innerHTML=kv.map(([k,v])=>`<span>${k}</span><b>${esc(v||'—')}</b>`).join('');
+  const s=jobStats(J);$('#orderBig').innerHTML=`<div><b>${s.pos}</b><span>windows</span></div><div><b>${s.parts}</b><span>parts</span></div><div><b>${s.t}</b><span>corners</span></div>`;
+  const cnt=t=>J.positions.reduce((a,p)=>a+(p.skip?0:t==='F'?(p.frame?1:0):t==='S'?p.nS:p.nM),0);
+  $('#incToggles').innerHTML=Object.entries(PTYPE).map(([t,n])=>`<button type="button" data-t="${t}" class="${J.include[t]?'on':''}"><i>${J.include[t]?'✓':''}</i>${n.replace(/sash$/,'sashe')}s <span class="muted mono" style="margin-left:auto">${cnt(t)}</span></button>`).join('');
+  $$('#segStage button').forEach(b=>b.classList.toggle('on',b.dataset.v===J.stage));$('#fBy').value=J.by||'';
+}
+$('#incToggles').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const t=b.dataset.t;J.include[t]=!J.include[t];
+  if(!Object.values(J.include).some(Boolean)){J.include[t]=true;toast('Keep at least one part type');return}save();renderS1()});
+$('#segStage').addEventListener('click',e=>{const b=e.target.closest('button');if(b){J.stage=b.dataset.v;save();renderS1()}});
+$('#fBy').addEventListener('input',e=>{J.by=e.target.value.trim();save()});
+
+/* ---------- STEP 2 ---------- */
+const drawEl=p=>p.drawing?`<div class="dr" style="background-image:url(${p.drawing})"></div>`:`<div class="dr none">${String(p.no).padStart(2,'0')}</div>`;
+function renderS2(){
+  $('#s2List').innerHTML=J.positions.map((p,i)=>{
+    const chips=[];if(p.frame)chips.push([`${p.fixed?'Frame (fixed)':'Frame'} ${mm(p.frame.w)}×${mm(p.frame.h)}`,'F']);
+    for(let k=0;k<p.nS;k++){const s=p.sashes[k]||{};chips.push([`Sash ${s.nr||k+1}${s.w?` ${mm(s.w)}×${mm(s.h)}`:''}`,'S'])}
+    for(let k=0;k<p.nM;k++)chips.push([`Mesh sash${p.mW?` ${mm(p.mW)}×${mm(p.mH)}`:''}`,'M']);
+    return `<div class="pc ${p.skip?'skip':''}" data-i="${i}" style="align-items:flex-start">${drawEl(p)}
+    <div class="m"><b>${esc(p.ref)}</b><span>${esc([p.series&&'Lingel '+p.series,p.frameType,p.qty>1?'Qty '+p.qty:''].filter(Boolean).join(' · '))}</span>
+      <div class="chiprow">${chips.map(([c,t])=>`<span class="chip ${J.include[t]?'':'off'}">${esc(c)}</span>`).join('')}</div>
+      <div class="cnts">
+        <div class="cnt">Sashes <button data-a="S-" aria-label="Fewer glass sashes">−</button><b>${p.nS}</b><button data-a="S+" aria-label="More glass sashes">+</button></div>
+        <div class="cnt">Mesh sash <button data-a="M-" aria-label="Fewer mesh sashes">−</button><b>${p.nM}</b><button data-a="M+" aria-label="More mesh sashes">+</button></div>
+        <button class="ib skipb ${p.skip?'on':''}" data-a="skip">${p.skip?'Skipped':'Skip'}</button>
+      </div></div></div>`}).join('');
+}
+$('#s2List').addEventListener('click',e=>{const b=e.target.closest('button[data-a]');if(!b)return;const p=J.positions[+b.closest('.pc').dataset.i],a=b.dataset.a;
+  if(a==='skip')p.skip=!p.skip;else{const k='n'+a[0];p[k]=Math.max(0,Math.min(6,p[k]+(a[1]==='+'?1:-1)))}save();renderS2()});
+
+/* ---------- STEP 3 ---------- */
+function renderS3(){
+  const s=jobStats(J);$('#s3Count').textContent=`${s.done} / ${s.t}`;$('#s3Bar').innerHTML=progBar(s);
+  $('#s3List').innerHTML=J.positions.map((p,i)=>{const pts=partsOf(p);if(!pts.length)return'';const st=posStats(p);
+    const minis=pts.map(pt=>{const c=k=>`<i style="background:${VC[cornerV(p.corners[pt.id+'|'+k])]}"></i>`;return `<span class="mini" title="${pt.label}">${c('TL')}${c('TR')}${c('BL')}${c('BR')}</span>`}).join('');
+    return `<button class="pc" data-i="${i}">${drawEl(p)}<div class="m"><b>${esc(p.ref)}</b><span>${st.done}/${st.t} corners · ${pts.length} parts${st.bad?` · <b style="color:var(--bad);display:inline">${st.bad} not OK</b>`:''}</span><div class="minis">${minis}</div></div>${pill(posV(p))}</button>`}).join('')
+    ||'<div class="empty">No windows to check. Turn part types back on in step 1.</div>';
+}
+$('#s3List').addEventListener('click',e=>{const b=e.target.closest('.pc');if(b){curPos=J.positions[+b.dataset.i];show('Pos')}});
+
+/* ---------- POSITION ---------- */
+const buzz=()=>{try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}};
+const activeIdx=()=>J.positions.map((p,i)=>partsOf(p).length?i:-1).filter(i=>i>=0);
+function renderPos(){
+  const p=curPos,pts=partsOf(p);
+  $('#posRef').textContent=p.ref;$('#posPill').innerHTML=pill(posV(p));
+  $('#posInfo').innerHTML=esc([p.series&&'Lingel '+p.series,p.frameType,p.method,p.connector&&'Corner connector '+p.connector,p.frame&&p.frame.w?`${mm(p.frame.w)} × ${mm(p.frame.h)} mm`:''].filter(Boolean).join(' · '));
+  $('#posImg').hidden=!p.drawing;if(p.drawing)$('#posImg').src=p.drawing;
+  $('#parts').innerHTML=pts.map(pt=>{const v=partV(p,pt.id),r=pt.w&&pt.h?Math.max(.42,Math.min(1.5,pt.w/pt.h)):.75,ov=p.partPhotos[pt.id];
+    return `<div class="part ${v}" data-p="${pt.id}"><div class="h"><b>${pt.label}</b><span>${esc(pt.art||PTYPE[pt.type])}${pt.w?` · ${mm(pt.w)}×${mm(pt.h)}`:''}</span></div>
+    <div class="pbox ${pt.type}" style="aspect-ratio:${r}">${ov?`<div class="ov" style="background-image:url(${ov.src})"></div>`:''}
+    ${['TL','TR','BL','BR'].map(k=>{const c=p.corners[pt.id+'|'+k],cv=cornerV(c);return `<button class="ck ${k} ${cv}" data-k="${k}" aria-label="${pt.label} ${CNAME[k]}: ${VL[cv]}" ${c&&c.photo&&cv==='fail'?`style="background-image:url(${c.photo.src})"`:''}>${cv==='ok'?'✓':cv==='fail'?(c.photo?'':'✗'):''}</button>`}).join('')}</div>
+    <div class="acts"><button class="ib" data-a="ok" style="color:var(--ok)">All 4 OK</button><button class="ib" data-a="ov" aria-label="Overview photo">${ov?'📷 ✓':'📷'}</button></div></div>`}).join('');
+  const act=activeIdx(),ai=act.indexOf(J.positions.indexOf(p));$('#btnPrevPos').disabled=ai<=0;$('#btnNextPos').disabled=ai>=act.length-1;
+  const left=pts.reduce((a,pt)=>a+CORNERS.filter(([k])=>!(p.corners[pt.id+'|'+k]||{}).v).length,0);
+  $('#btnWinOk').textContent=left?`✓ Rest OK (${left})`:'✓ All checked';$('#btnWinOk').disabled=!left;
+}
+$('#parts').addEventListener('click',e=>{const part=e.target.closest('.part');if(!part)return;curPart=part.dataset.p;
+  const ck=e.target.closest('.ck');if(ck){openCorner(ck.dataset.k);return}
+  const a=e.target.closest('[data-a]');if(!a)return;
+  if(a.dataset.a==='ok'){CORNERS.forEach(([k])=>{const key=curPart+'|'+k,c=curPos.corners[key]||(curPos.corners[key]={defects:[]});if(!c.v)c.v='ok'});buzz();save();renderPos()}
+  if(a.dataset.a==='ov'){camTarget='overview';openCam()}});
+$('#btnWinOk').onclick=()=>{let n=0;partsOf(curPos).forEach(pt=>CORNERS.forEach(([k])=>{const key=pt.id+'|'+k,c=curPos.corners[key]||(curPos.corners[key]={defects:[]});if(!c.v){c.v='ok';n++}}));
+  buzz();save();renderPos();toast(n?`${n} corners marked OK`:'Nothing left unchecked')};
+$('#btnPosBack').onclick=()=>show('S3');
+const stepPos=d=>{const act=activeIdx(),ai=act.indexOf(J.positions.indexOf(curPos))+d;if(ai>=0&&ai<act.length){curPos=J.positions[act[ai]];renderPos();window.scrollTo(0,0)}};
+$('#btnPrevPos').onclick=()=>stepPos(-1);$('#btnNextPos').onclick=()=>stepPos(1);
+
+/* ---------- CORNER SHEET ---------- */
+const key=()=>curPart+'|'+curCorner;
+const cObj=create=>{if(!curPos.corners[key()]&&create)curPos.corners[key()]={defects:[]};return curPos.corners[key()]};
+const partLabel=()=>(partsOf(curPos).find(x=>x.id===curPart)||{}).label||'';
+function openCorner(k){curCorner=k;$('#sheet').classList.add('on');$('#sheet .body').scrollTop=0;renderCorner()}
+function renderCorner(){
+  const c=cObj(false);$('#shTitle').textContent=`${curPos.ref.split(/\s/)[0]} · ${partLabel()} · ${CNAME[curCorner]}`;
+  const v=cornerV(c);$('#shVerdict').className='pill v-'+v;$('#shVerdict').textContent=VL[v];
+  $('#ph').innerHTML=c&&c.photo?`<img src="${c.photo.src}" alt="Corner photo">`
+    :`<div class="none"><svg width="48" height="48" viewBox="0 0 48 48" style="transform:rotate(${ROT[curCorner]}deg)"><path d="M10 10h32M10 10v32" stroke="#ffce1f" stroke-width="5" fill="none"/><path d="M10 10l8 8" stroke="#ffce1f" stroke-width="1.5"/></svg><br>A photo is needed only if the corner is not OK.</div>`;
+  $('#btnCam').textContent=c&&c.photo?'Retake photo':'Take photo';
+  $('#qwarn').innerHTML=c&&c.warn&&c.warn.length?`<div class="warn">${c.warn.map(esc).join('<br>')}</div>`:'';
+  $$('#verdict button').forEach(b=>b.classList.toggle('on',!!c&&c.v===b.dataset.v));
+  $('#defBox').hidden=!(c&&c.v==='bad');
+  $('#defChips').innerHTML=(DEF[J.material]||DEF.alu).map(([k,n,h])=>`<button type="button" data-d="${k}" title="${esc(h)}" class="${c&&c.defects&&c.defects.includes(k)?'on':''}">${esc(n)}</button>`).join('');
+  $('#fNote').value=c&&c.note||'';$('#btnAI').disabled=!(c&&c.photo);
+  $('#aiBox').innerHTML=c&&c.ai?`<div class="ai"><b>AI view:</b> ${esc(c.ai.summary)}${c.ai.retake?`<br><span class="muted">Retake advised: ${esc(c.ai.retake)}</span>`:''}<br><span class="muted small">Suggestion only — confirm with your own eyes.</span></div>`:'';
+  if(c&&c.v==='bad'&&!c.photo)$('#qwarn').innerHTML+='<div class="warn">Add a photo so the factory can see the problem.</div>';
+  const seq=cornerSeq(),at=seq.findIndex(s=>s.part===curPart&&s.k===curCorner);
+  $('#btnPrevC').disabled=at<=0;$('#btnNextC').textContent=at>=seq.length-1?'Done':'Next corner ›';
+}
+const cornerSeq=()=>partsOf(curPos).flatMap(pt=>CORNERS.map(([k])=>({part:pt.id,k})));
+function moveCorner(d){const seq=cornerSeq(),at=seq.findIndex(s=>s.part===curPart&&s.k===curCorner),n=seq[at+d];
+  if(!n){closeSheet();return}curPart=n.part;curCorner=n.k;$('#sheet .body').scrollTop=0;renderCorner()}
+$('#btnNextC').onclick=()=>moveCorner(1);$('#btnPrevC').onclick=()=>moveCorner(-1);
+function closeSheet(){$('#sheet').classList.remove('on');if(view==='Pos')renderPos();else if(view==='S4')renderS4()}
+$('#btnShClose').onclick=closeSheet;
+$('#verdict').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const c=cObj(true);
+  c.v=c.v===b.dataset.v?undefined:b.dataset.v;if(c.v!=='bad')c.defects=[];save();renderCorner()});
+$('#defChips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const c=cObj(true);c.defects=c.defects||[];
+  const k=b.dataset.d;c.defects=c.defects.includes(k)?c.defects.filter(x=>x!==k):[...c.defects,k];save();renderCorner()});
+$('#fNote').addEventListener('input',e=>{cObj(true).note=e.target.value;save()});
+$('#ph').addEventListener('click',()=>{const c=cObj(false);if(c&&c.photo){$('#zoomImg').src=c.photo.src;$('#zoom').classList.remove('z2');$('#zoom').classList.add('on')}});
+$('#zoomImg').onclick=()=>$('#zoom').classList.toggle('z2');$('#zoomClose').onclick=()=>$('#zoom').classList.remove('on');
+
+/* ---------- photos ---------- */
+let geo=null;
+function getGeo(){return new Promise(res=>{if(geo&&Date.now()-geo.t<60000)return res(geo);if(!navigator.geolocation)return res(geo);
+  const to=setTimeout(()=>res(geo),6000);
+  navigator.geolocation.getCurrentPosition(p=>{clearTimeout(to);geo={lat:+p.coords.latitude.toFixed(5),lng:+p.coords.longitude.toFixed(5),acc:Math.round(p.coords.accuracy),t:Date.now()};res(geo)},
+    ()=>{clearTimeout(to);res(geo)},{enableHighAccuracy:true,timeout:6000,maximumAge:60000})})}
+const loadImg=src=>new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src});
+function drawJpeg(src,w,h,max,q,stamp){const s=Math.min(1,max/Math.max(w,h));const cv=document.createElement('canvas');cv.width=Math.round(w*s);cv.height=Math.round(h*s);
+  const x=cv.getContext('2d');x.drawImage(src,0,0,cv.width,cv.height);
+  if(stamp){const fs=Math.max(13,Math.round(cv.width/48)),bh=fs*2.9;x.fillStyle='rgba(0,0,0,.58)';x.fillRect(0,cv.height-bh,cv.width,bh);
+    x.fillStyle='#fff';x.font=`600 ${fs}px Archivo,Arial,sans-serif`;x.fillText(stamp[0],fs*.6,cv.height-bh+fs*1.2);
+    x.fillStyle='#ffce1f';x.font=`${fs*.9}px Archivo,Arial,sans-serif`;x.fillText(stamp[1],fs*.6,cv.height-bh+fs*2.4)}
+  return cv.toDataURL('image/jpeg',q)}
+function quality(img){const w=256,h=Math.max(1,Math.round(img.height/img.width*256));const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+  const x=cv.getContext('2d');x.drawImage(img,0,0,w,h);const d=x.getImageData(0,0,w,h).data;const g=new Float32Array(w*h);let sum=0;
+  for(let i=0;i<w*h;i++){const v=.299*d[i*4]+.587*d[i*4+1]+.114*d[i*4+2];g[i]=v;sum+=v}
+  let s1=0,s2=0,n=0;const hh=Math.floor(h*.85);
+  for(let y=1;y<hh-1;y++)for(let X=1;X<w-1;X++){const i=y*w+X,l=g[i-w]+g[i+w]+g[i-1]+g[i+1]-4*g[i];s1+=l;s2+=l*l;n++}
+  const sharp=s2/n-(s1/n)**2,mean=sum/(w*h),out=[];
+  if(sharp<40)out.push('Photo looks blurry. Hold steady, tap the screen to focus, and retake.');
+  if(mean<55)out.push('Photo is too dark. Add light or use the phone torch.');
+  if(mean>215)out.push('Photo is too bright. Avoid glare on the joint.');return out}
+async function savePhoto(src,w,h){
+  const g=await getGeo(),now=new Date(),pl=partsOf(curPos).find(x=>x.id===curPart)||{};
+  const what=camTarget==='overview'?`${pl.label} overview`:`${pl.label} · ${CNAME[curCorner]}`;
+  const stamp=[`${J.offer||'—'} · ${curPos.ref} · ${what}`,
+    `${now.toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}${g?`  ·  ${g.lat}, ${g.lng} ±${g.acc}m`:''}`];
+  const url=drawJpeg(src,w,h,1280,.8,stamp);const photo={src:url,at:now.getTime(),lat:g&&g.lat,lng:g&&g.lng};
+  if(camTarget==='overview'){curPos.partPhotos[curPart]=photo;save();renderPos();toast('Overview photo saved');return}
+  const img=await loadImg(url),c=cObj(true);c.photo=photo;c.warn=quality(img);c.ai=null;
+  if(!c.v){c.v='bad'} // a photo is taken because something looks wrong
+  save();renderCorner();if(!c.warn.length)toast('Photo saved — tick what is wrong');
+}
+async function fromFile(f){if(!f)return;const r=new FileReader();r.onload=async()=>{const i=await loadImg(r.result);await savePhoto(i,i.width,i.height)};r.readAsDataURL(f)}
+$('#fileCam').onchange=e=>{fromFile(e.target.files[0]);e.target.value=''};
+$('#fileGal').onchange=e=>{fromFile(e.target.files[0]);e.target.value=''};
+$('#btnGal').onclick=()=>{camTarget='corner';$('#fileGal').click()};
+let stream=null;
+async function openCam(){getGeo();const ov=camTarget==='overview';
+  $('#guideSvg').style.display=ov?'none':'';$('#guideG').setAttribute('transform',`rotate(${ROT[curCorner]} 50 50)`);
+  $('#camHint').textContent=ov?`${partLabel()} — fit the whole part in the frame`:`${partLabel()} · ${CNAME[curCorner]} — line the joint up with the yellow corner`;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){$('#fileCam').click();return}
+  $('#cam').classList.add('on');
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1440}},audio:false});
+    const v=$('#vid');v.srcObject=stream;await v.play()}catch(e){closeCam();$('#fileCam').click()}}
+function closeCam(){$('#cam').classList.remove('on');if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
+$('#btnCam').onclick=()=>{camTarget='corner';openCam()};$('#camCancel').onclick=closeCam;$('#camFile').onclick=()=>{closeCam();$('#fileGal').click()};
+$('#camSnap').onclick=async()=>{const v=$('#vid');if(!v.videoWidth)return;const w=v.videoWidth,h=v.videoHeight;
+  const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(v,0,0);closeCam();await savePhoto(cv,w,h)};
+
+/* ---------- optional AI check ---------- */
+$('#btnAI').onclick=async()=>{
+  const api=apiLink();if(!api){toast('Add the Apps Script link in Settings first');openSettings();return}
+  const c=cObj(false);if(!c||!c.photo)return;const btn=$('#btnAI');btn.disabled=true;btn.textContent='Checking photo…';
+  try{const img=await loadImg(c.photo.src);const b64=drawJpeg(img,img.width,img.height,1024,.8).split(',')[1];
+    const items=(DEF[J.material]||DEF.alu).filter(d=>d[0]!=='other').map(d=>({c:d[0],t:'Look for: '+d[1],h:d[2]}));
+    const r=await fetch(api,{method:'POST',body:new URLSearchParams({action:'cornerCheck',material:J.material==='alu'?'aluminium':'uPVC',part:partLabel(),corner:CNAME[curCorner],items:JSON.stringify(items),image:b64})});
+    const j=await r.json();if(!j.ok)throw new Error(j.error||'no answer');
+    const bad=Object.entries(j.items||{}).filter(([,v])=>v==='bad').map(([k])=>k);
+    c.ai={summary:j.summary||'',retake:j.retake||'',at:Date.now()};if(bad.length&&!(c.defects||[]).length){c.v='bad';c.defects=bad}
+    save();renderCorner();toast('AI suggestion added — confirm it');
+  }catch(e){toast('AI check failed ('+e.message+'). Judge it by eye.')}
+  finally{btn.textContent='Check photo with AI';btn.disabled=false}
+};
+
+/* ---------- STEP 4: report ---------- */
+function problems(){const cnt={},type={},series={},list=[];
+  J.positions.forEach(p=>partsOf(p).forEach(pt=>CORNERS.forEach(([k])=>{const c=p.corners[pt.id+'|'+k],v=cornerV(c);
+    const sk='Lingel '+(p.series||'?');
+    if(v==='ok'||v==='fail'){type[pt.type]=type[pt.type]||{n:0,bad:0};type[pt.type].n++;series[sk]=series[sk]||{n:0,bad:0};series[sk].n++}
+    if(v==='fail'){type[pt.type].bad++;series[sk].bad++;(c.defects&&c.defects.length?c.defects:['other']).forEach(d=>cnt[d]=(cnt[d]||0)+1);list.push({p,pt,k,c})}})));
+  return{cnt,type,series,list}}
+const rateBars=obj=>Object.entries(obj).map(([k,o])=>`<div class="hbar"><div class="t"><span>${esc(k)}</span><span class="mono">${o.bad} of ${o.n} <span class="muted">(${o.n?Math.round(o.bad/o.n*100):0}%)</span></span></div><div class="b"><i style="width:${o.n?o.bad/o.n*100:0}%"></i></div></div>`).join('');
+function renderS4(){
+  const s=jobStats(J),pend=s.t-s.done,{cnt,type,series,list}=problems();
+  $('#s4Stat').innerHTML=`<div><b>${s.pos}</b><span>windows</span></div><div><b style="color:var(--ok)">${s.ok}</b><span>corners OK</span></div><div><b style="color:var(--bad)">${s.bad}</b><span>not OK</span></div><div><b>${pend}</b><span>not checked</span></div>`;
+  $('#s4Bar').innerHTML=progBar(s);
+  $('#s4AllOk').innerHTML=s.t&&!s.bad&&!pend?'<div class="allok">✓ All corners OK</div>':'';
+  ['#pDef','#pType','#pSeries','#pNok'].forEach(id=>$(id).hidden=!list.length);
+  const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]),max=top.length?top[0][1]:1;
+  $('#s4Def').innerHTML=top.map(([k,n])=>`<div class="hbar"><div class="t"><span>${esc(defName(J.material,k))}</span><b class="mono">${n}</b></div><div class="b"><i style="width:${n/max*100}%"></i></div></div>`).join('');
+  $('#s4Type').innerHTML=rateBars(Object.fromEntries(Object.entries(type).map(([t,o])=>[PTYPE[t],o])));
+  $('#s4Series').innerHTML=rateBars(series);$('#pSeries').hidden=!list.length||Object.keys(series).length<2;
+  $('#s4Nok').innerHTML=list.map((x,n)=>`<button class="nok" data-n="${n}">${x.c.photo?`<img src="${x.c.photo.src}" alt="">`:'<div class="noimg"></div>'}
+    <div class="m"><b>${esc(x.p.ref)} · ${x.pt.label} · ${CNAME[x.k]}</b><span class="muted">${esc((x.c.defects||[]).map(d=>defName(J.material,d)).join(', ')||'No problem ticked')}${x.c.note?' — '+esc(x.c.note):''}${x.c.photo?'':' · no photo'}</span></div></button>`).join('');
+  $('#s4Nok').querySelectorAll('.nok').forEach(b=>b.onclick=()=>{const x=list[+b.dataset.n];curPos=x.p;curPart=x.pt.id;openCorner(x.k)});
+}
+
+/* PDF */
+const asc=s=>String(s??'').replace(/×/g,'x').replace(/[–—]/g,'-').replace(/[^\x20-\x7E\u00A0-\u00FF]/g,'');
+const shrinkCache={};
+async function shrink(src,max){const k=src.length+':'+max;if(shrinkCache[k])return shrinkCache[k];const i=await loadImg(src);return shrinkCache[k]=drawJpeg(i,i.width,i.height,max,.72)}
+async function makePDF(){
+  await loadScript(JSPDF);const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});
+  const W=210,H=297,M=12,NAVY=[22,41,77],RED=[200,16,46],OK=[17,131,79],BAD=[194,29,29],GR=[110,110,110],TODO=[185,188,195];
+  const col=v=>v==='ok'?OK:v==='fail'?BAD:GR;let y=0;let logo='';try{logo=localStorage.getItem('lingel_logo')||''}catch(e){}
+  const header=()=>{doc.setFillColor(...NAVY);doc.rect(0,0,W,16,'F');doc.setFillColor(...RED);doc.rect(0,16,W,1.2,'F');
+    let drew=false;if(logo){try{const pr=doc.getImageProperties(logo);const h=9,w=Math.min(28,h*pr.width/pr.height);doc.setFillColor(255,255,255);doc.roundedRect(M-1.5,2.5,w+3,11,1.5,1.5,'F');doc.addImage(logo,'JPEG',M,3.5,w,h);drew=true}catch(e){}}
+    if(!drew){doc.setTextColor(255,206,31);doc.setFont('helvetica','bold');doc.setFontSize(15);doc.text('LINGEL',M,10.8)}
+    doc.setTextColor(255);doc.setFont('helvetica','bold');doc.setFontSize(11.5);doc.text('Corner Joint Check',W-M,7.6,{align:'right'});
+    doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.text(asc(`Order ${J.offer||'-'}  |  ${J.customer||''}`).slice(0,80),W-M,12.6,{align:'right'});y=24};
+  const need=h=>{if(y+h>H-14){doc.addPage();header()}};
+  header();
+  const stageName={factory:'Factory',dispatch:'Dispatch',site:'Site'}[J.stage]||'';
+  const info=[['Order',J.offer],['Customer',J.customer],['Administrator',J.admin],['Sales by',J.sales],['Colour',(J.color||'').replace(/_/g,' ')],['Checked at',stageName],['Checked by',J.by],['Date',new Date().toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})]];
+  doc.setDrawColor(200);doc.setLineWidth(.3);doc.roundedRect(M,y,W-2*M,32,2,2);doc.setFontSize(9);
+  info.forEach(([l,v],n)=>{const cx=M+4+(n%2)*93,cy=y+6.5+Math.floor(n/2)*7;doc.setTextColor(...GR);doc.setFont('helvetica','normal');doc.text(l,cx,cy);
+    doc.setTextColor(20);doc.setFont('helvetica','bold');doc.text(doc.splitTextToSize(asc(v||'-'),62)[0],cx+25,cy)});
+  y+=38;
+  const s=jobStats(J),pend=s.t-s.done;
+  const boxes=[['Windows',s.pos,[20,20,20]],['Corners OK',s.ok,OK],['Not OK',s.bad,BAD],['Not checked',pend,GR]],bw=(W-2*M-9)/4;
+  boxes.forEach(([l,v,c],n)=>{const x=M+n*(bw+3);doc.setFillColor(244,245,247);doc.roundedRect(x,y,bw,18,2,2,'F');
+    doc.setTextColor(...c);doc.setFont('helvetica','bold');doc.setFontSize(17);doc.text(String(v),x+bw/2,y+9.5,{align:'center'});
+    doc.setTextColor(...GR);doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.text(l,x+bw/2,y+15,{align:'center'})});
+  y+=22;if(s.t){const bwid=W-2*M;doc.setFillColor(230,232,236);doc.rect(M,y,bwid,3.5,'F');
+    if(s.ok){doc.setFillColor(...OK);doc.rect(M,y,bwid*s.ok/s.t,3.5,'F')}if(s.bad){doc.setFillColor(...BAD);doc.rect(M+bwid*s.ok/s.t,y,bwid*s.bad/s.t,3.5,'F')}}
+  y+=10;
+  const {list,type}=problems();
+  if(s.t&&!s.bad&&!pend){doc.setDrawColor(...OK);doc.setLineWidth(.8);doc.roundedRect(W/2-45,y,90,20,3,3);doc.roundedRect(W/2-43.5,y+1.5,87,17,2.5,2.5);
+    doc.setTextColor(...OK);doc.setFont('helvetica','bold');doc.setFontSize(15);doc.text('ALL CORNERS OK',W/2,y+10,{align:'center'});
+    doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.text(`${s.t} corners checked, no problems found`,W/2,y+15.5,{align:'center'});y+=28}
+  if(list.length){
+    // not-OK by part type, as a compact row of bars
+    doc.setTextColor(40);doc.setFont('helvetica','bold');doc.setFontSize(10);doc.text('Not OK by part type',M,y);y+=4;
+    Object.entries(type).forEach(([t,o])=>{doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(40);doc.text(PTYPE[t],M,y+3);
+      doc.setFillColor(232,234,238);doc.rect(M+28,y,100,3.6,'F');if(o.bad){doc.setFillColor(...BAD);doc.rect(M+28,y,100*o.bad/o.n,3.6,'F')}
+      doc.setTextColor(...GR);doc.text(`${o.bad} of ${o.n}`,M+131,y+3);y+=5.6});y+=4;
+    doc.setTextColor(...BAD);doc.setFont('helvetica','bold');doc.setFontSize(11);doc.text(`CORNERS NOT OK (${list.length})`,M,y);y+=3;
+    const cols=[['Position',44],['Part',26],['Corner',22],['Problem',52],['Note',W-2*M-144]];
+    const head=()=>{doc.setFillColor(...NAVY);doc.rect(M,y,W-2*M,6.5,'F');doc.setTextColor(255);doc.setFontSize(8.5);doc.setFont('helvetica','bold');let x=M;cols.forEach(([t,w])=>{doc.text(t,x+1.5,y+4.5);x+=w});y+=6.5};
+    head();doc.setFont('helvetica','normal');
+    list.forEach((r,n)=>{const vals=[r.p.ref,`${r.pt.label}${r.pt.art?' ('+r.pt.art+')':''}`,CNAME[r.k],(r.c.defects||[]).map(d=>defName(J.material,d)).join(', ')||'-',r.c.note||''];
+      const wr=vals.map((v,j)=>doc.splitTextToSize(asc(v),cols[j][1]-3));const rh=Math.max(...wr.map(w=>w.length))*3.8+2.6;
+      if(y+rh>H-14){doc.addPage();header();head();doc.setFont('helvetica','normal')}
+      if(n%2){doc.setFillColor(247,247,249);doc.rect(M,y,W-2*M,rh,'F')}
+      doc.setTextColor(25);doc.setFontSize(8.5);let x=M;wr.forEach((w,j)=>{doc.text(w,x+1.5,y+4);x+=cols[j][1]});y+=rh});
+    doc.setDrawColor(210);doc.line(M,y,W-M,y);y+=8}
+  // per window: drawing + each part as a small rectangle with coloured corners, then photos of problems
+  const DW=30,PX=M+DW+5,slot=27;
+  for(const p of J.positions){
+    const pts=partsOf(p);if(!pts.length)continue;const pv=posV(p);need(58);
+    doc.setFillColor(238,240,244);doc.rect(M,y,W-2*M,8,'F');doc.setFillColor(...col(pv));doc.rect(M,y,1.6,8,'F');
+    doc.setTextColor(20);doc.setFont('helvetica','bold');doc.setFontSize(10.5);doc.text(asc(p.ref).slice(0,48),M+4,y+5.4);
+    doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(...GR);doc.text(asc([p.series&&'Lingel '+p.series,p.frame&&p.frame.w?`${mm(p.frame.w)} x ${mm(p.frame.h)}`:''].filter(Boolean).join('  |  ')),W-M-30,y+5.4,{align:'right'});
+    doc.setTextColor(...col(pv));doc.setFont('helvetica','bold');doc.text(VL[pv].toUpperCase(),W-M-3,y+5.4,{align:'right'});y+=11;
+    const top=y;let dh=0;
+    if(p.drawing){try{const pr=doc.getImageProperties(p.drawing);let w=DW,h=w*pr.height/pr.width;if(h>40){h=40;w=h*pr.width/pr.height}doc.addImage(p.drawing,'JPEG',M,y,w,h);dh=h}catch(e){}}
+    let x=PX,rowY=y,rowH=0;
+    pts.forEach(pt=>{if(x+slot>W-M+1){x=PX;rowY+=rowH+3;rowH=0}
+      const r=pt.w&&pt.h?Math.max(.42,Math.min(1.5,pt.w/pt.h)):.75;let bh=26,bw=bh*r;if(bw>20){bw=20;bh=bw/r}
+      const bx=x+(slot-bw)/2-1,by=rowY;doc.setDrawColor(90);doc.setLineWidth(1.1);doc.rect(bx,by,bw,bh);
+      [['TL',bx,by],['TR',bx+bw,by],['BL',bx,by+bh],['BR',bx+bw,by+bh]].forEach(([k,cx,cy])=>{const v=cornerV(p.corners[pt.id+'|'+k]);
+        doc.setFillColor(...(v==='ok'?OK:v==='fail'?BAD:TODO));doc.rect(cx-1.8,cy-1.8,3.6,3.6,'F')});
+      const v=partV(p,pt.id);doc.setFont('helvetica','bold');doc.setFontSize(7.6);doc.setTextColor(40);doc.text(pt.label,x+slot/2-1,by+bh+4.4,{align:'center'});
+      doc.setTextColor(...col(v));doc.setFontSize(7);doc.text(v==='ok'?'OK':v==='fail'?'NOT OK':v==='prog'?'part checked':'not checked',x+slot/2-1,by+bh+7.6,{align:'center'});
+      rowH=Math.max(rowH,bh+9);x+=slot});
+    y=Math.max(rowY+rowH,top+dh)+4;
+    const photos=[];pts.forEach(pt=>{CORNERS.forEach(([k])=>{const c=p.corners[pt.id+'|'+k];if(c&&c.v==='bad'&&c.photo)photos.push({src:c.photo.src,at:c.photo.at,cap:`${pt.label} - ${CNAME[k]}`,sub:(c.defects||[]).map(d=>defName(J.material,d)).join(', ')+(c.note?' - '+c.note:''),bad:true})});
+      const ov=p.partPhotos[pt.id];if(ov)photos.push({src:ov.src,at:ov.at,cap:`${pt.label} - overview`,sub:''})});
+    if(photos.length){const pw=(W-2*M-6)/4,ph=pw*.75;
+      for(let i=0;i<photos.length;i+=4){need(ph+14);let maxC=0;
+        for(let j=0;j<4&&i+j<photos.length;j++){const f=photos[i+j],px=M+j*(pw+2);
+          try{doc.addImage(await shrink(f.src,560),'JPEG',px,y,pw,ph)}catch(e){}
+          doc.setDrawColor(...(f.bad?BAD:[180,180,180]));doc.setLineWidth(f.bad?.7:.3);doc.rect(px,y,pw,ph);
+          doc.setFont('helvetica','bold');doc.setFontSize(7.6);doc.setTextColor(...(f.bad?BAD:[40,40,40]));doc.text(asc(f.cap),px,y+ph+3.3);
+          doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(70);const t=f.sub?doc.splitTextToSize(asc(f.sub),pw).slice(0,2):[];if(t.length)doc.text(t,px,y+ph+6.3);
+          doc.setTextColor(140);doc.text(asc(new Date(f.at).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})),px,y+ph+6.3+t.length*2.8);
+          maxC=Math.max(maxC,6.3+t.length*2.8+1)}
+        y+=ph+maxC+3}}
+    y+=4}
+  const n=doc.getNumberOfPages();for(let i=1;i<=n;i++){doc.setPage(i);doc.setFontSize(7.5);doc.setTextColor(150);doc.setFont('helvetica','normal');
+    doc.text(asc(`Lingel Windows & Doors  |  Corner joint check  |  ${J.offer||''}  |  from production sheet`),M,H-6);doc.text(`Page ${i} of ${n}`,W-M,H-6,{align:'right'})}
+  return doc;
+}
+
+/* one tap: download → Drive → Sheet, with an outbox */
+const obAll=()=>idb('outbox','readonly',s=>s.getAll()).then(x=>(x||[]).sort((a,b)=>a.ts-b.ts));
+const obPut=o=>idb('outbox','readwrite',s=>s.put(o));const obDel=id=>idb('outbox','readwrite',s=>s.delete(id));
+let flushing=false;
+async function flushOutbox(){if(flushing)return{sent:0,left:0};flushing=true;let sent=0,err='';
+  try{const api=apiLink();const jobs=await obAll();if(!api||!jobs.length)return{sent,left:jobs.length};
+    for(const j of jobs){try{const r=await fetch(api,{method:'POST',body:new URLSearchParams(j.params)});const t=await r.text();let o={};try{o=JSON.parse(t)}catch(e){}
+      if(!r.ok||o.ok===false)throw new Error(o.error||('HTTP '+r.status));await obDel(j.id);sent++}catch(e){err=e.message}}
+    return{sent,left:(await obAll()).length,err}}finally{flushing=false}}
+const orderSqft=j=>(j.positions||[]).reduce((a,p)=>a+((p.frame&&p.frame.w&&p.frame.h)?p.frame.w*p.frame.h*(p.qty||1)/92903.04:0),0);
+function reportParams(){const s=jobStats(J),{list}=problems();
+  return{action:'cornerLog',offerNo:J.offer,customer:J.customer,phone:'',site:'',material:J.material==='alu'?'Aluminium':'uPVC',
+    stage:{factory:'Factory',dispatch:'Dispatch',site:'Site'}[J.stage],checkedBy:J.by||supervisor(),positions:String(s.pos),sqft:orderSqft(J).toFixed(2),pdfName:`CornerCheck_${slug(J.offer)}.pdf`,corners:String(s.t),ok:String(s.ok),notOk:String(s.bad),notChecked:String(s.t-s.done),
+    result:VL[jobV(J)],problems:list.map(x=>`${x.p.ref} ${x.pt.label} ${CNAME[x.k]}: ${(x.c.defects||[]).map(d=>defName(J.material,d)).join('/')||'-'}`).join(' | ')}}
+$('#btnPDF').onclick=async()=>{const btn=$('#btnPDF');btn.disabled=true;
+  try{setStatus('#s4Status','Building the PDF…');const doc=await makePDF();const name=`CornerCheck_${slug(J.offer)}.pdf`;doc.save(name);
+    let api=apiLink();if(!api){api=(prompt('PDF downloaded. Paste the Apps Script /exec link to also upload to Drive and log the Sheet:')||'').trim();if(api)localStorage.setItem('lingel_api',api)}
+    if(!api){setStatus('#s4Status','PDF downloaded. Add the Apps Script link in Settings to send it to Drive.','good');return}
+    const du=doc.output('datauristring');const b64=du.slice(du.indexOf(',')+1);const ts=Date.now();
+    await obPut({id:'pdf_'+J.id,ts,params:{action:'upload',folder:J.offer||'CornerCheck',name,mime:'application/pdf',data:b64}});
+    await obPut({id:'log_'+J.id,ts:ts+1,params:reportParams()});
+    setStatus('#s4Status','PDF downloaded. Sending to Drive and Sheet…');const r=await flushOutbox();
+    if(!r.left)setStatus('#s4Status','✓ PDF downloaded, uploaded to Drive and logged in the Sheet.','good');
+    else setStatus('#s4Status',`PDF downloaded. ${r.left} item(s) kept on the phone and will send when back online${r.err?' ('+esc(r.err)+')':''}.`,'err');
+  }catch(e){setStatus('#s4Status','Could not make the PDF: '+esc(e.message),'err')}finally{btn.disabled=false}};
+$('#btnShare').onclick=async()=>{const s=jobStats(J),{list}=problems(),pend=s.t-s.done;
+  let t=`*Corner joint check — ${J.offer||''}*\n${J.customer||''}\n${({factory:'Factory',dispatch:'Dispatch',site:'Site'})[J.stage]} · by ${J.by||'-'}\n\nWindows: ${s.pos}\nCorners OK: ${s.ok} / ${s.t}\nNot OK: ${s.bad}${pend?`\nNot checked: ${pend}`:''}\n`;
+  if(list.length)t+='\n*Not OK*\n'+list.map(x=>`• ${x.p.ref} — ${x.pt.label}, ${CNAME[x.k]}: ${(x.c.defects||[]).map(d=>defName(J.material,d)).join(', ')||'see photo'}${x.c.note?' ('+x.c.note+')':''}`).join('\n');
+  else if(!pend&&s.t)t+='\n✅ All corners OK';
+  try{if(navigator.share){await navigator.share({text:t});return}}catch(e){if(e.name==='AbortError')return}
+  try{await navigator.clipboard.writeText(t)}catch(e){}window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank')};
+
+/* ---------- settings ---------- */
+async function openSettings(){$('#fApi').value=apiLink();const n=(await obAll()).length;$('#obInfo').textContent=n?`${n} item(s) waiting to upload.`:'Nothing waiting.';$('#settings').classList.add('on')}
+$('#btnSettings').onclick=openSettings;$('#setClose').onclick=()=>$('#settings').classList.remove('on');
+$('#setSave').onclick=()=>{const v=$('#fApi').value.trim();if(v)localStorage.setItem('lingel_api',v);$('#settings').classList.remove('on');toast('Saved')};
+$('#btnFlush').onclick=async()=>{const r=await flushOutbox();toast(r.left?`${r.left} still waiting${r.err?' — '+r.err:''}`:`Sent ${r.sent}`);openSettings()};
+window.addEventListener('online',()=>flushOutbox().then(r=>{if(r.sent)toast(`Uploaded ${r.sent} waiting item(s)`)}));
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#cam').classList.contains('on'))closeCam();else if($('#zoom').classList.contains('on'))$('#zoom').classList.remove('on');else if($('#sheet').classList.contains('on'))closeSheet()});
+
+openDB().then(()=>{show('Jobs');flushOutbox()}).catch(()=>{document.body.innerHTML='<div class="wrap"><div class="panel">This browser blocks on-phone storage (private mode?). Open the app in a normal Chrome tab.</div></div>'});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+})();
+</script>
+<script>
+/* ===== LINGEL ORDER DOCUMENTS (shared by every app) ==========================
+   1) Library: a quotation or production sheet uploaded ONCE in any app is saved
+      by Offer No; every other app loads it with "Load by Offer No".
+   2) Reader: LD.kind(file) tells a production sheet from a quotation, and
+      LD.parseProduction(file) reads a production sheet exactly like Corner Check.
+   Backend: hub Apps Script actions docSave / docGet / docList.               */
+(function(){
+  if (window.LD) return;
+  var HUB = "https://script.google.com/macros/s/AKfycbzTi9ihe1YpDEIkX7IdAnDqNl61rU3IDecHUetV4mmwAVezMbJSu_Ruxg4_CJnscVEH/exec";
+  var CACHE = 'lingel-docs-v1';
+  var PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+  var PDFJS_W = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  var LD = window.LD = {};
+  function api(){ return HUB; }
+  function key(o){ return String(o||'').trim().toUpperCase().replace(/\s+/g,''); }
+  function cacheUrl(o,k){ return './__orderdoc__/'+encodeURIComponent(key(o))+'/'+k; }
+  function b64ToBlob(b64){ var bin=atob(b64), u=new Uint8Array(bin.length); for(var i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return new Blob([u],{type:'application/pdf'}); }
+  function toB64(blob){ return new Promise(function(res,rej){ var r=new FileReader(); r.onload=function(){ var s=String(r.result); res(s.slice(s.indexOf(',')+1)); }; r.onerror=rej; r.readAsDataURL(blob); }); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];}); }
+  function who(){ try{ var s=JSON.parse(localStorage.getItem('lingel_supervisor')||'null'); return (s&&s.name)||''; }catch(e){ return ''; } }
+
+  async function post(params){
+    var r = await fetch(api(), {method:'POST', body:new URLSearchParams(params)});
+    var t = (await r.text()).trim();
+    if (t.charAt(0)==='<') throw new Error('Backend not reachable. Check the hub script deployment.');
+    var d; try{ d=JSON.parse(t); }catch(e){ throw new Error('Backend reply not understood'); }
+    if (d && d.ok===false && !d.notFound && /supervisor list|unknown|password|pin/i.test(d.error||'')) throw new Error('Hub script not updated yet: install the document library and redeploy.');
+    return d;
+  }
+  async function keep(offer,kind,file,meta){ try{ var c=await caches.open(CACHE); await c.put(cacheUrl(offer,kind), new Response(file,{headers:{'Content-Type':'application/pdf','X-Meta':encodeURIComponent(JSON.stringify(meta||{}))}})); }catch(e){} }
+  async function local(offer,prefer){
+    var order = prefer==='quotation' ? ['quotation','production'] : ['production','quotation'];
+    try{ var c=await caches.open(CACHE);
+      for (var i=0;i<order.length;i++){ var r=await c.match(cacheUrl(offer,order[i])); if(!r) continue;
+        var meta=JSON.parse(decodeURIComponent(r.headers.get('X-Meta')||'%7B%7D')); var b=await r.blob();
+        return {file:new File([b], meta.name||(order[i]+'_'+key(offer)+'.pdf'), {type:'application/pdf'}), kind:order[i], meta:meta, offline:true}; }
+    }catch(e){}
+    return null;
+  }
+
+  /* ---------- library ---------- */
+  LD.save = async function(file, meta){            // meta: {offer, kind, customer, site, salesperson, positions, sqft, app}
+    meta = Object.assign({by:who()}, meta||{});
+    if (!key(meta.offer)) throw new Error('No Offer No to save under');
+    /* sq.ft log: a production sheet always carries its per-window areas, whichever app saves it */
+    if (meta.kind==='production' && !meta.items){
+      try{ var pr = await LD.parseProduction(file, {drawings:false});
+        var its = pr.positions.map(function(p){ return {ref:p.ref, w:Math.round(p.w||0), h:Math.round(p.h||0), qty:p.qty||1, sqft:+(p.sqft||0).toFixed(2), series:p.series||''}; });
+        meta.items = its;
+        if (!meta.sqft) meta.sqft = its.reduce(function(a,p){return a+p.sqft;},0).toFixed(2);
+        if (!meta.positions) meta.positions = String(its.length);
+        if (!meta.customer) meta.customer = pr.customer||'';
+        if (!meta.salesperson) meta.salesperson = pr.sales||'';
+      }catch(e){}
+    }
+    if (meta.items && typeof meta.items!=='string') meta.items = JSON.stringify(meta.items);
+    await keep(meta.offer, meta.kind, file, Object.assign({}, meta, {name:file.name}));
+    var data = await toB64(file);
+    var r = await post(Object.assign({action:'docSave', data:data}, meta));
+    if (!r || !r.ok) throw new Error((r&&r.error)||'Save failed');
+    return r;
+  };
+  /* save quietly after an app reads a PDF; never blocks or throws */
+  LD.saveQuiet = function(file, meta){ try{ LD.save(file, meta).catch(function(e){ console.warn('Library save failed:', e.message); }); }catch(e){} };
+  LD.load = async function(offer, prefer){         // → {file, kind, meta, offline}
+    if (!key(offer)) throw new Error('Enter an Offer No.');
+    var r;
+    try{ r = await post({action:'docGet', offer:offer, prefer:prefer||'production'}); }
+    catch(e){ var l=await local(offer,prefer); if(l) return l; throw e; }
+    if (r && r.ok && r.data){
+      var file = new File([b64ToBlob(r.data)], r.name||(r.kind+'_'+key(offer)+'.pdf'), {type:'application/pdf'});
+      delete r.data; await keep(offer, r.kind, file, r);
+      return {file:file, kind:r.kind, meta:r, offline:false};
+    }
+    var l2 = await local(offer,prefer); if (l2) return l2;
+    throw new Error((r&&r.error)||('Nothing saved for '+offer));
+  };
+  LD.api = api;
+  LD.list = async function(){ try{ var r=await post({action:'docList'}); return (r&&r.ok&&r.list)||[]; }catch(e){ return []; } };
+
+  /* "Load by Offer No" dialog. onLoaded(file, kind, meta, offline) */
+  LD.openLoader = function(onLoaded, preset, prefer){
+    var old=document.getElementById('ldDlg'); if(old) old.remove();
+    var w=document.createElement('div'); w.id='ldDlg';
+    w.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px';
+    w.innerHTML='<div style="background:#1a1e25;color:#e8e4d9;border:1px solid #2a2f3a;border-top:4px solid #ffce1f;border-radius:12px;padding:18px;width:100%;max-width:380px;font-family:\'Spline Sans\',system-ui,sans-serif">'
+      +'<div style="font-family:Archivo,sans-serif;font-weight:900;font-size:17px;margin-bottom:4px">Load by Offer No</div>'
+      +'<div style="font-size:12px;color:#7c8694;margin-bottom:12px">Uses the production sheet or quotation already uploaded in any app</div>'
+      +'<input id="ldOff" list="ldDl" autocomplete="off" placeholder="e.g. 79173/3" style="width:100%;box-sizing:border-box;padding:11px 13px;font-size:16px;border-radius:8px;border:1px solid #2a2f3a;background:#222732;color:#e8e4d9">'
+      +'<datalist id="ldDl"></datalist>'
+      +'<div id="ldMsg" style="min-height:18px;font-size:12px;margin:8px 0;color:#7c8694"></div>'
+      +'<div style="display:flex;gap:8px"><button id="ldX" type="button" style="flex:1;padding:11px;border-radius:8px;border:1px solid #2a2f3a;background:transparent;color:#7c8694;font-weight:700">Cancel</button>'
+      +'<button id="ldGo" type="button" style="flex:1;padding:11px;border-radius:8px;border:none;background:#ffce1f;color:#111;font-weight:700">Load →</button></div></div>';
+    document.body.appendChild(w);
+    var inp=w.querySelector('#ldOff'), msg=w.querySelector('#ldMsg'), go=w.querySelector('#ldGo');
+    if (preset) inp.value=preset;
+    setTimeout(function(){ inp.focus(); },50);
+    LD.list().then(function(list){ w.querySelector('#ldDl').innerHTML=list.map(function(x){
+      var tag=(x.kinds||[]).map(function(k){return k==='production'?'Production sheet':'Quotation';}).join(' + ');
+      return '<option value="'+esc(x.offer)+'">'+esc((x.customer||'')+(tag?' · '+tag:''))+'</option>'; }).join(''); });
+    function close(){ w.remove(); }
+    w.querySelector('#ldX').onclick=close;
+    w.addEventListener('click',function(e){ if(e.target===w) close(); });
+    async function run(){
+      var off=inp.value.trim(); if(!off){ msg.style.color='#ef4444'; msg.textContent='Enter an Offer No.'; return; }
+      go.disabled=true; msg.style.color='#7c8694'; msg.textContent='Loading…';
+      try{ var res=await LD.load(off, prefer); close(); await onLoaded(res.file, res.kind, Object.assign({offer:off}, res.meta||{}), res.offline); }
+      catch(e){ go.disabled=false; msg.style.color='#ef4444'; msg.textContent=e.message||String(e); }
+    }
+    go.onclick=run; inp.addEventListener('keydown',function(e){ if(e.key==='Enter') run(); });
+  };
+
+  /* ---------- reading PDFs ---------- */
+  function loadScript(src){ return new Promise(function(res,rej){ var s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=function(){rej(new Error('Could not load '+src));}; document.head.appendChild(s); }); }
+  LD.pdfjs = async function(){
+    if (!window.pdfjsLib) await loadScript(PDFJS);
+    try{ if (!window.pdfjsLib.GlobalWorkerOptions.workerSrc) window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_W; }catch(e){}
+    return window.pdfjsLib;
+  };
+  /* 'production' if the PDF is a Lingel production sheet, else 'quotation' */
+  LD.kind = async function(file){
+    var lib = await LD.pdfjs();
+    var pdf = await lib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
+    var tc = await (await pdf.getPage(1)).getTextContent();
+    var t = tc.items.map(function(i){return i.str;}).join(' ');
+    return /Order-Pos\.?\s*:/.test(t) || /Dokument-Nr\.?\s*:/.test(t) ? 'production' : 'quotation';
+  };
+
+  /* Production sheet reader — same rules as Corner Check.
+     → {offer, customer, admin, sales, color, material, positions:[{ref,no,qty,w,h,sqft,nS,nM,fixed,system,frameType,series,method,connector,frame,sashes,mW,mH,mArt,drawing}], drawings:Promise} */
+  var NUM=/^\d{2,5}[,.]\d{1,2}$/;
+  function num(s){ return parseFloat(String(s).replace(',','.')); }
+  LD.parseProduction = async function(file, opts){
+    opts = opts||{};
+    var lib = await LD.pdfjs();
+    var pdf = await lib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
+    var lines=[];
+    for (var pn=1; pn<=pdf.numPages; pn++){
+      if (opts.progress) opts.progress('Reading page '+pn+' of '+pdf.numPages+'…');
+      var page=await pdf.getPage(pn), vp=page.getViewport({scale:1}), tc=await page.getTextContent(), toks=[];
+      tc.items.forEach(function(it){ if(!it.str||!it.str.trim()) return; var x=it.transform[4], y=vp.height-it.transform[5], cw=(it.width||0)/Math.max(1,it.str.length);
+        var idx=0; it.str.split(/(\s+)/).forEach(function(part){ if(part.trim()) toks.push({s:part,x:x+idx*cw,y:y,page:pn}); idx+=part.length; }); });
+      toks.sort(function(a,b){return a.y-b.y||a.x-b.x;});
+      var rows=[]; toks.forEach(function(t){ var r=rows.find(function(r){return Math.abs(r.y-t.y)<2.5;}); r?r.toks.push(t):rows.push({y:t.y,toks:[t]}); });
+      rows.sort(function(a,b){return a.y-b.y;}).forEach(function(r){ r.toks.sort(function(a,b){return a.x-b.x;});
+        lines.push({page:pn,y:r.y,toks:r.toks,text:r.toks.map(function(t){return t.s;}).join(' ')}); });
+    }
+    var full=lines.map(function(l){return l.text;}).join('\n');
+    var g=function(re,s){ var m=(s==null?full:s).match(re); return m?m[1].trim():''; };
+    var out={offer:g(/Dokument-Nr\.?\s*:\s*(\S+)/), customer:g(/Customer:\s*(.+?)\s+Administrator:/), admin:g(/Administrator:\s*([^\n]+)/),
+      sales:g(/Sales by:\s*([^\n]+)/), color:'', material:/System\s*:\s*u?PVC/i.test(full)?'upvc':'alu', positions:[]};
+    var ops=lines.map(function(l,i){return /Order-Pos\.?\s*:/.test(l.text)?i:-1;}).filter(function(i){return i>=0;});
+    var blocks=[];
+    ops.forEach(function(oi,k){
+      var end=k+1<ops.length?ops[k+1]:lines.length, bl=lines.slice(oi,end), L0=lines[oi];
+      var txt=bl.map(function(l){return l.text;}).join('\n');
+      var ref=g(/Order-Pos\.?\s*:\s*(.*?)\s*(?:Color:|Quantity:|$)/,L0.text), contY=L0.y;
+      var nx=lines[oi+1];
+      if (nx&&nx.page===L0.page&&nx.y-L0.y<14&&nx.text.indexOf(':')<0&&nx.text.length<=24){ ref+=' '+nx.text.trim(); contY=nx.y; }
+      if (!out.color) out.color=g(/Color:\s*(\S+)/,L0.text);
+      var p={ref:ref, qty:+g(/Quantity:\s*(\d+)/,L0.text)||1,
+        system:g(/System\s*:\s*(?:Aluminium\s*-\s*)?([^\n]+?)(?:\s{2,}|$)/m,txt), series:g(/Lingel\s*([\d.]+)/,txt),
+        frameType:g(/Frame\s*:\s*([^\n]+)/,txt), method:g(/Method\s*:\s*([A-Za-z ]+?)(?:,|\n|$)/,txt), connector:g(/Corner Connector\s*:\s*(\S+)/,txt),
+        frame:null, fixed:false, sashes:[], nS:0, nM:0, drawing:''};
+      var hi=bl.findIndex(function(l){return /^Nr\b/.test(l.text)&&l.text.indexOf('Artikel')>=0;});
+      if (hi>=0){ var H=bl[hi], arts=H.toks.filter(function(t){return t.s==='Artikel';}), nrMax=arts[0].x-3, colMax=arts[1]?arts[1].x-3:arts[0].x+150;
+        var tl=[]; for (var i=hi+1;i<bl.length;i++){ var l=bl[i]; if(l.page!==H.page||/^(Connectors|Sliding|Shutter|Hardware|ISO|Production)/.test(l.text)) break; tl.push.apply(tl, l.toks.filter(function(t){return t.x<colMax;})); }
+        var nums=tl.filter(function(t){return NUM.test(t.s);}), rws=[];
+        nums.forEach(function(t){ var r=rws.find(function(r){return Math.abs(r.y-t.y)<2.5;}); r?r.n.push(t):rws.push({y:t.y,n:[t]}); });
+        rws.sort(function(a,b){return a.y-b.y;});
+        rws.forEach(function(r,i){ if(r.n.length<2) return; r.n.sort(function(a,b){return a.x-b.x;}); var ny=rws[i+1]?rws[i+1].y:1e9, lim=Math.min(ny-2.5,r.y+16);
+          var art=tl.filter(function(t){return /[A-Za-z]/.test(t.s)&&t.x<r.n[0].x-1&&t.y>=r.y-3&&t.y<lim;}).sort(function(a,b){return a.y-b.y||a.x-b.x;}).map(function(t){return t.s;}).join('');
+          var nr=tl.find(function(t){return t.x<nrMax+6&&/^\d{1,2}$/.test(t.s)&&t.y>=r.y-3&&t.y<lim;});
+          var o={art:art,w:num(r.n[0].s),h:num(r.n[1].s),nr:nr?+nr.s:0};
+          if (o.nr) p.sashes.push(o); else if (!p.frame) p.frame=o; });
+        if (!p.frame&&p.sashes.length===1){ p.frame=p.sashes[0]; p.frame.nr=0; p.sashes=[]; p.fixed=true; }
+      }
+      if (!p.frame) p.frame={art:'',w:0,h:0};
+      p.nS=p.sashes.length;
+      var cut=function(name){ var re=new RegExp(name+'[^\\n]*?(\\d{2,5}[,.]\\d)\\s+45\\s+45\\s+([UOLR])\\b','g'), m, w=0, h=0, n=0;
+        while((m=re.exec(txt))){ n++; if(/[UO]/.test(m[2])) w=w||num(m[1]); else h=h||num(m[1]); } return {n:n,w:w,h:h}; };
+      var ms=cut('Aluminium Sliding Sash');
+      p.nM=Math.ceil(ms.n/4); p.mW=ms.w; p.mH=ms.h; p.mArt=g(/(\S+?-FB-\S+)/,txt);
+      p.no=parseInt(ref,10)||k+1;
+      p.w=p.frame.w; p.h=p.frame.h;
+      p.sqft=p.w&&p.h ? p.w*p.h*p.qty/92903.04 : 0;          // mm² → sq.ft, times quantity
+      blocks.push({p:p,page:L0.page,y0:contY+6});
+      out.positions.push(p);
+    });
+    out.positions.sort(function(a,b){return a.no-b.no;});
+    out.drawings = opts.drawings===false ? Promise.resolve() : extractDrawings(pdf,blocks);
+    return out;
+  };
+  async function extractDrawings(pdf,blocks){
+    var byPage={}; blocks.forEach(function(b){ (byPage[b.page]=byPage[b.page]||[]).push(b); });
+    for (var pg in byPage){
+      var page=await pdf.getPage(+pg), S=2, vp=page.getViewport({scale:S});
+      var cv=document.createElement('canvas'); cv.width=vp.width; cv.height=vp.height; var ctx=cv.getContext('2d');
+      ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height); await page.render({canvasContext:ctx,viewport:vp}).promise;
+      byPage[pg].forEach(function(b){ try{ var x0=25,x1=188,y0=b.y0,y1=Math.min(vp.height/S,y0+330); if(y1-y0<30) return;
+        var c=document.createElement('canvas'); c.width=(x1-x0)*S; c.height=Math.round((y1-y0)*S); var cx=c.getContext('2d'); cx.drawImage(cv,x0*S,y0*S,c.width,c.height,0,0,c.width,c.height);
+        var d=cx.getImageData(0,0,c.width,c.height).data, first=-1, blank=0, cutY=c.height;
+        for (var y=0;y<c.height;y++){ var ink=false; for (var x=0;x<c.width;x+=2){ var i=(y*c.width+x)*4; if(d[i]+d[i+1]+d[i+2]<600){ink=true;break;} }
+          if (ink){ if(first<0) first=y; blank=0; } else if (first>=0){ blank++; if(y-first>100*S&&blank>=7*S){ cutY=y-blank+1; break; } } }
+        var o=document.createElement('canvas'); o.width=c.width; o.height=cutY; o.getContext('2d').drawImage(c,0,0);
+        var t=trimWhite(o); if(t) b.p.drawing=t; }catch(e){} });
+    }
+  }
+  function trimWhite(c){ var x=c.getContext('2d'), d=x.getImageData(0,0,c.width,c.height).data, a=c.width, b=c.height, r=-1, s=-1;
+    for (var y=0;y<c.height;y++) for (var X=0;X<c.width;X++){ var i=(y*c.width+X)*4; if(d[i]+d[i+1]+d[i+2]<690){ if(X<a)a=X; if(X>r)r=X; if(y<b)b=y; if(y>s)s=y; } }
+    if (r<0) return ''; var P=6; a=Math.max(0,a-P); b=Math.max(0,b-P); r=Math.min(c.width,r+P); s=Math.min(c.height,s+P);
+    var w=r-a, h=s-b, k=Math.min(1,560/Math.max(w,h)); var o=document.createElement('canvas'); o.width=Math.round(w*k); o.height=Math.round(h*k);
+    var ox=o.getContext('2d'); ox.fillStyle='#fff'; ox.fillRect(0,0,o.width,o.height); ox.drawImage(c,a,b,w,h,0,0,o.width,o.height); return o.toDataURL('image/jpeg',.82); }
+
+  /* one-line description used by apps that show a "spec" */
+  LD.describe = function(p){
+    var parts=[];
+    if (p.system) parts.push(p.system);
+    parts.push(p.fixed ? 'Fixed' : (p.nS ? p.nS+' sash'+(p.nS>1?'es':'') : ''));
+    if (p.nM) parts.push(p.nM+' mesh');
+    return parts.filter(Boolean).join(' · ');
+  };
+})();
+
+</script>
+</body>
+</html>
