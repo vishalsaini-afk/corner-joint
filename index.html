@@ -206,7 +206,7 @@ label.f input,textarea.in{display:block;width:100%;margin-top:4px;background:var
 <!-- JOBS -->
 <section id="vJobs"><div class="wrap">
   <h2 style="font-size:26px;margin:6px 0 4px">Corner Check</h2>
-  <p class="lead">Upload the production sheet. Every frame, glass sash and mesh sash is read from it, so you only check corners and photograph the bad ones.</p>
+  <p class="lead">Upload the production sheet. Every frame, glass sash and mesh sash is read from it, so you only check corners and photograph each one, OK or not OK.</p>
   <button class="drop" id="btnUpload">
     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ffce1f" stroke-width="1.6"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/><path d="M12 17v-6M9 13.5l3-3 3 3"/></svg>
     <b>Upload production sheet PDF</b><span>Positions, parts, sizes and drawings are read automatically</span>
@@ -649,6 +649,7 @@ function renderCorner(){
   $('#fNote').value=c&&c.note||'';$('#btnAI').disabled=!(c&&c.photo);
   $('#aiBox').innerHTML=c&&c.ai?`<div class="ai"><b>AI view:</b> ${esc(c.ai.summary)}${c.ai.retake?`<br><span class="muted">Retake advised: ${esc(c.ai.retake)}</span>`:''}<br><span class="muted small">Suggestion only — confirm with your own eyes.</span></div>`:'';
   if(c&&c.v==='bad'&&!c.photo)$('#qwarn').innerHTML+='<div class="warn">Add a photo so the factory can see the problem.</div>';
+  else if(c&&c.v==='ok'&&!c.photo)$('#qwarn').innerHTML+='<div class="warn">Add a photo of this OK corner as proof.</div>';
   const seq=cornerSeq(),at=seq.findIndex(s=>s.part===curPart&&s.k===curCorner);
   $('#btnPrevC').disabled=at<=0;$('#btnNextC').textContent=at>=seq.length-1?'Done':'Next corner ›';
 }
@@ -696,8 +697,7 @@ async function savePhoto(src,w,h){
   const url=drawJpeg(src,w,h,1280,.8,stamp);const photo={src:url,at:now.getTime(),lat:g&&g.lat,lng:g&&g.lng};
   if(camTarget==='overview'){curPos.partPhotos[curPart]=photo;save();renderPos();toast('Overview photo saved');return}
   const img=await loadImg(url),c=cObj(true);c.photo=photo;c.warn=quality(img);c.ai=null;
-  if(!c.v){c.v='bad'} // a photo is taken because something looks wrong
-  save();renderCorner();if(!c.warn.length)toast('Photo saved — tick what is wrong');
+  save();renderCorner();if(!c.warn.length)toast(c.v?'Photo saved':'Photo saved — now mark OK or Not OK');
 }
 async function fromFile(f){if(!f)return;const r=new FileReader();r.onload=async()=>{const i=await loadImg(r.result);await savePhoto(i,i.width,i.height)};r.readAsDataURL(f)}
 $('#fileCam').onchange=e=>{fromFile(e.target.files[0]);e.target.value=''};
@@ -823,14 +823,17 @@ async function makePDF(){
       doc.setTextColor(...col(v));doc.setFontSize(7);doc.text(v==='ok'?'OK':v==='fail'?'NOT OK':v==='prog'?'part checked':'not checked',x+slot/2-1,by+bh+7.6,{align:'center'});
       rowH=Math.max(rowH,bh+9);x+=slot});
     y=Math.max(rowY+rowH,top+dh)+4;
-    const photos=[];pts.forEach(pt=>{CORNERS.forEach(([k])=>{const c=p.corners[pt.id+'|'+k];if(c&&c.v==='bad'&&c.photo)photos.push({src:c.photo.src,at:c.photo.at,cap:`${pt.label} - ${CNAME[k]}`,sub:(c.defects||[]).map(d=>defName(J.material,d)).join(', ')+(c.note?' - '+c.note:''),bad:true})});
+    const photos=[];pts.forEach(pt=>{CORNERS.forEach(([k])=>{const c=p.corners[pt.id+'|'+k];if(!c||!c.photo)return;
+        if(c.v==='bad')photos.push({src:c.photo.src,at:c.photo.at,cap:`${pt.label} - ${CNAME[k]} - NOT OK`,sub:(c.defects||[]).map(d=>defName(J.material,d)).join(', ')+(c.note?' - '+c.note:''),bad:true});
+        else if(c.v==='ok')photos.push({src:c.photo.src,at:c.photo.at,cap:`${pt.label} - ${CNAME[k]} - OK`,sub:c.note||'',good:true});});
       const ov=p.partPhotos[pt.id];if(ov)photos.push({src:ov.src,at:ov.at,cap:`${pt.label} - overview`,sub:''})});
+    photos.sort((a,b)=>(b.bad?1:0)-(a.bad?1:0));
     if(photos.length){const pw=(W-2*M-6)/4,ph=pw*.75;
       for(let i=0;i<photos.length;i+=4){need(ph+14);let maxC=0;
         for(let j=0;j<4&&i+j<photos.length;j++){const f=photos[i+j],px=M+j*(pw+2);
           try{doc.addImage(await shrink(f.src,560),'JPEG',px,y,pw,ph)}catch(e){}
-          doc.setDrawColor(...(f.bad?BAD:[180,180,180]));doc.setLineWidth(f.bad?.7:.3);doc.rect(px,y,pw,ph);
-          doc.setFont('helvetica','bold');doc.setFontSize(7.6);doc.setTextColor(...(f.bad?BAD:[40,40,40]));doc.text(asc(f.cap),px,y+ph+3.3);
+          doc.setDrawColor(...(f.bad?BAD:f.good?[34,139,72]:[180,180,180]));doc.setLineWidth(f.bad||f.good?.7:.3);doc.rect(px,y,pw,ph);
+          doc.setFont('helvetica','bold');doc.setFontSize(7.6);doc.setTextColor(...(f.bad?BAD:f.good?[34,139,72]:[40,40,40]));doc.text(asc(f.cap),px,y+ph+3.3);
           doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(70);const t=f.sub?doc.splitTextToSize(asc(f.sub),pw).slice(0,2):[];if(t.length)doc.text(t,px,y+ph+6.3);
           doc.setTextColor(140);doc.text(asc(new Date(f.at).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})),px,y+ph+6.3+t.length*2.8);
           maxC=Math.max(maxC,6.3+t.length*2.8+1)}
